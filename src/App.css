@@ -1,0 +1,65 @@
+/* Ensure body and root containers take full width and height */
+body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  overflow: hidden; /* Prevents scrolling */
+}
+
+/* Map should take up the full space of the window */
+#map {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0; /* Behind the navigation overlay */
+}
+
+/* Navigation overlay positioned on top of the map */
+nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: rgba(48, 65, 91, 0.8); /* Slight transparency to see the map underneath */
+  color: white;
+  padding: 5px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1; /* Above the map */
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Title styling to match original font and size */
+nav h1 {
+  margin: 0;
+  font-size: 1.5em; /* Adjust as necessary to match original look */
+  font-weight: bold;
+  color: white;
+}
+
+/* Menu button (SVG) styling */
+nav .menu-button {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* Button styling with hover effect */
+button {
+  padding: 8px 16px;
+  background-color: #956F2E;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #7a5823;
+}

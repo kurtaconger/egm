@@ -1,0 +1,293 @@
+/* Includes classes for MapPopup and Comments */
+
+.popup--modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 500; /* Ensure modal is above all other elements */
+}
+
+/* main MapBox control */
+.popup--modal-content {
+  background: white;
+  padding: 10px 0;
+  border-radius: 5px;
+  width: 650px;
+  height: 480px;
+  border: 1px solid green;
+  max-width: 85%;
+  min-width: 400px;
+  transform: translateY(5%); 
+  z-index: 600; /* Ensure modal content is above the overlay */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.popup--header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  border-bottom: 2px solid var(--SYellow);
+}
+
+.popup--spot-location-title {
+  margin: 0 auto;
+  color: var(--sDarkBlue);
+  font-family: 'Roboto';
+  font-size: 18px;
+}
+
+.popup--close-window-sgv,
+.popup--previous-location-sgv,
+.popup--next-location-sgv {
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.popup--next-location-sgv,
+.comments--edit-button {
+  margin-left: 8px;
+}
+
+.popup--display-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow: hidden;
+  height: 355px;
+  box-sizing: border-box;
+  border: 3px solid var(--SYellow);
+}
+
+
+.popup--video {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+
+/* KEEP  */
+.comments--editor-control-div {
+  border: 1px solid var(--SYellow); 
+  height: 300px; 
+  width: 98%;
+  margin: auto;
+  overflow-y: auto;
+  font-family: 'Nunito';
+  font-size: 13px;
+  padding: 2px;
+}
+
+@media (max-width: 600px) {
+  .comments--editor-control-div {
+    width: 98%;
+  }
+}
+
+
+
+
+.comments--edit-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  background-color: var(--sDarkBlue);
+  border: 4px solid var(--sDarkBlue);
+  border-radius: 3px;
+  height: 24px;
+  width: 24px;
+}
+
+.Mui-selected {
+  color: var(--sDarkBlue) !important;
+}
+
+.MuiTabs-indicator {
+  background-color: var(--SYellow) !important;
+}
+
+.popup--file-image-container {
+  width: 100%;
+  height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.popup--file-image {
+  max-width: 100%;
+  max-height: 100%;
+  margin: 2px;
+  object-fit: contain;
+}
+
+/* Image gallery */
+.image--custom-image-gallery img,
+.image--custom-image-gallery {
+  width: auto;
+  height: 260px;
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+  margin: 0 auto;
+  object-fit: contain;
+
+}
+
+/* Video container for .mp4 files */
+.popup--video-container {
+  width: 100%;
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+
+.image-gallery-image {
+  max-width: 100%;
+  height: 300px; /* Adjust this value as needed */
+  overflow: hidden;
+}
+
+.image-gallery-image video {
+  max-width: 100%;
+  max-height: 100%; /* Ensure the video scales within the container */
+  object-fit: contain; /* Maintain aspect ratio */
+}
+
+
+
+
+
+@media (max-width: 600px) {
+  /* Adjustments for portrait pictures on iPhone */
+  .image--custom-image-gallery img,
+  .image--custom-image-gallery {
+      width: auto;
+      max-height: 90vh;
+  }
+}
+
+
+
+.image-gallery-slide-wrapper.fullscreen,
+.image-gallery-image.fullscreen {
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+}
+
+.image-gallery-image.fullscreen img,
+.image-gallery-image.fullscreen video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover; /* or try contain if cropping is not desired */
+}
+
+
+
+
+
+
+.comments-summery-div {
+  padding: 0;
+  border: 0;
+}
+
+
+.comments-summery-text {
+  padding: 0;
+  border: 0;
+  overflow-y: auto;
+  font-family: 'Nunito';
+  font-size: 13px;
+  padding: 2px;
+  overflow-y: auto;
+}
+
+
+
+.summary-paragraph {
+  margin-bottom: 1em;
+}
+
+
+
+
+
+/* AI-GenComments Styles */
+
+.ai-gen-container {
+  display: flex;
+  flex-direction: column;
+  height: 346px;
+}
+
+.ai-gen-textarea {
+  flex-grow: 1;
+  width: 100%;
+  border: 1px solid var(--SYellow);
+  padding: 4px;
+  margin-bottom: 5px;
+  font-family: 'Nunito';
+  font-size: 13px;
+  resize: none;
+  overflow-y: auto; /* Allows vertical scroll only if needed */
+  color: #666; /* Grey placeholder text */
+  height: 250px; /* Display 10 lines by default */
+}
+
+.ai-gen-textarea::placeholder {
+  color: #ccc;
+}
+
+.ai-gen-instruction {
+  text-align: left;
+  font-size: 0.9em;
+  color: #555;
+  margin: 0;
+  padding: 0;
+}
+
+.ai-gen-button-container {
+  display: flex;
+  justify-content: space-evenly;
+  padding: 5px;
+  margin-top: auto;
+}
+
+.ai-gen-button {
+  background-color: #004466;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  cursor: pointer;
+  flex-grow: 1;
+  text-align: center;
+  margin: 0 5px;
+  max-width: 130px;
+}
+
+.ai-gen-button:disabled {
+  background-color: #b0b0b0;
+  cursor: not-allowed;
+}
+

@@ -1,0 +1,169 @@
+/* CSS for Map and Mapbox popup */
+
+@import url('https://fonts.googleapis.com/css?family=Nunito:400,700&display=swap');
+
+* {
+    box-sizing: border-box;
+}
+
+:root {
+  --sDarkBlue: #30415B;
+  --SYellow: #956F2E;
+}
+
+body, html, #root {
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden; /* Hide scrollbars */
+}
+
+#map {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+}
+
+/* Custom marker styling */
+.marker {
+  background-color: var(--sDarkBlue);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  border-radius: 50%;
+  width: 22px; 
+  height: 22px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* Custom styling for the MapBox popup */
+.map--popup-outside-container {
+  padding-top: 10px;  /* so popup does not overlap with marker */
+}
+
+.map--popup-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 120px;
+  background-color: white;
+  border: 1px solid var(--SYellow);
+  border-radius: 5px;
+  padding: 5px;
+  margin-bottom: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  /* Optional: Add a subtle shadow */
+}
+
+.map--popup-title {
+  padding: 4pt 5pt;  /* Increased padding slightly for better visual balance */
+  font-family: 'Roboto';
+  font-size: 9pt;  /* Adjusted font size for slightly better readability */
+  font-weight: bold;
+  margin: 0;
+  color: var(--sDarkBlue)  /* Optional: Adjust color for better contrast */
+}
+
+.map--popup-image {
+  width: 100%;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 3px;  /* Optional: Add slight rounding to image corners */
+}
+
+
+/* Custom styling for the popup */
+.map--popup-outside-container {
+  padding-top: 10px;  /* so popup does not overlap with marker */
+}
+
+.map--popup-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 120px;
+  background-color: white;
+  border: 1px solid var(--SYellow);
+  border-radius: 5px;
+  padding: 5px;
+  margin-bottom: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  /* Optional: Add a subtle shadow */
+}
+
+.map--popup-image {
+  width: 100%;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 3px;  /* Optional: Add slight rounding to image corners */
+}
+
+.map--popup-title {
+  padding: 4pt 5pt;  /* Increased padding slightly for better visual balance */
+  font-family: 'Roboto';
+  font-size: 9pt;  /* Adjusted font size for slightly better readability */
+  font-weight: bold;
+  margin: 0;
+  color: var(--sDarkBlue)  /* Optional: Adjust color for better contrast */
+}
+
+
+/* Override Mapbox's default popup styling */
+.mapboxgl-popup-content {
+  background: none !important;  /* Removes the default white background */
+  box-shadow: none !important;  /* Removes the default shadow */
+  padding: 0 !important;  /* Removes the default padding */
+}
+
+.mapboxgl-popup-tip {
+  display: none !important;  /* Hides the popup arrow */
+}
+
+
+/* Mobile-specific styles */
+@media only screen and (max-width: 600px) {
+  .map--popup-container {
+    width: 100px;
+    padding: 5px; /* Increase padding for better touch accessibility */
+    margin-bottom: 10px; /* Increase margin for better spacing */
+    background-color: #f8f8f8; /* Softer background color for better readability */
+    border: 1px solid var(--SYellow); /* Adding a subtle border */
+    border-radius: 8px; /* Slightly more rounded corners */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Slightly stronger shadow */
+  }
+
+  .map--popup-image {
+    display: none;
+  }
+
+  .map--popup-title {
+    font-size: 8pt;
+    font-weight: bold;
+    margin: 2px 0; /* Add margin for better spacing */
+    color: #333;
+
+  }
+
+  .map--popup-container.mobile {
+    width: 100px;
+    padding: 10px;
+    text-align: center; /* Ensuring centered content */
+  }
+
+
+}
+
+
+.map--popup-container.has-comments {
+  background-color: white;
+}
+
+.map--popup-container.no-comments {
+  background-color: pink;
+}

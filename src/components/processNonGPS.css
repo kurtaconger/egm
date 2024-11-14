@@ -1,0 +1,116 @@
+/* styles for AssignLocation window */
+.ass-loc--overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.ass-loc--content {
+    background-color: gray;
+    border-radius: 8px;
+    padding: 0px 2px;
+    width: 300px;
+    height: 500px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.ass-loc--header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0;
+    height: 40px;
+}
+
+.ass-loc--title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.ass-loc-close-button {
+    background-color: transparent;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.ass-loc--body {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.ass-loc--image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+    max-height: 50%; /* Image container height */
+}
+
+.ass-loc--image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* Ensures the aspect ratio is maintained */
+}
+
+.ass-loc--video {
+    max-width: 100%;
+    max-height: 200px;
+    object-fit: contain; /* Keeps the video within its container */
+    border-radius: 8px; /* Adds some radius to the video */4
+}
+
+/* Ensure the video viewer matches the image viewer height */
+.ass-loc--video-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+    max-height: 40%; /* Reduce the video container height to 40% */
+}
+
+.ass-loc--button-container {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    border-bottom: 1px solid var(--sDarkBlue);
+}
+
+.ass-loc--button {
+    padding: 10px;
+    background-color: var(--sDarkBlue);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.ass-loc--button:hover {
+    background-color: var(--SYellow);
+    color: var(--sDarkBlue);
+}
+
+.ass-loc--list {
+    font-size: 12px;
+    padding: 1px;
+}
+
+.pict--list {
+    font-size: 10px;
+}
+
+/* Ensure videos start muted by default */
+video[muted] {
+    mute: true;
+}
