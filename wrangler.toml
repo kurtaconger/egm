@@ -3,9 +3,7 @@ type = "javascript"
 
 [build]
 command = "npm install --legacy-peer-deps && npm run build"
-cwd = "."
 upload = { format = "directory", path = "./dist" }
 
 [env.production]
 pages_build_output_dir = "dist"
-
