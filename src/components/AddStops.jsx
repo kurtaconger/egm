@@ -82,7 +82,7 @@ const AddStops = ({ onClose, tripID, mapboxAccessToken }) => {
         lng: stop.lng,
         seq: index + 1
       }).then(() => {
-        console.log(`Successfully saved ${stopID}`);
+        console.log(`location Successfully saved ${stopID}`);
       }).catch((error) => {
         console.error(`Error saving ${stopID}:`, error);
       });
