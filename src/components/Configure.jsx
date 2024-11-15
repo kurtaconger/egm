@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import './configure.css';
+import './navigation.css';
 import { db } from '../utils/firebase';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
@@ -63,36 +63,36 @@ function Configure({ isConfigureModalOpen, onClose }) {
 
   return (
     <div>
-      {isConfigureModalOpen && (
-        <div className="modal--overlay">
-          <div className="modal--content">
-            <div className="modal--header">
-              <h2>Configure Map</h2>
-              <button className="modal--close-button" onClick={onClose}>X</button>
-            </div>
-            <div className="modal--body">
-              <label>Latest Trip ID</label>
-              <input
-                type="text"
-                value={latestTripID}
-                readOnly
-                placeholder="Latest Trip ID will appear here"
-              />
-              <label>Title</label>
-              <input
-                type="text"
-                value={tripTitle}
-                onChange={(e) => setTripTitle(e.target.value)}
-                placeholder="<appears at the top of the screen>"
-              />
-              <div className="modal--save-message">{saveMessage}</div>
-              <button className="modal--save-button" onClick={handleSave}>Save</button>
-            </div>
+    {isConfigureModalOpen && (
+      <div className="modal--overlay">
+        <div className="modal--content">
+          <div className="modal--header">
+            <h2 className='modal--title'>Configure Map</h2>
+            <button className="modal--close-button" onClick={onClose}>X</button>
+          </div>
+          <div className="modal--body">
+            <label className='modal--label'>Latest Trip ID</label>
+            <input 
+              type="text"
+              value={latestTripID}
+              readOnly
+              placeholder="Latest Trip ID will appear here"
+            />
+            <label className='modal--label'>Title</label>
+            <input
+              type="text"
+              value={tripTitle}
+              onChange={(e) => setTripTitle(e.target.value)}
+              placeholder="<appears at the top of the screen>"
+            />
+            <div className="modal--save-message">{saveMessage}</div>
+            <button className="modal--button" onClick={handleSave}>Save</button>
           </div>
         </div>
-      )}
-    </div>
-  );
+      </div>
+    )}
+  </div>
+);
 }
 
 Configure.propTypes = {

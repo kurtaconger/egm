@@ -8,6 +8,7 @@
 
 .nav--map-title-container {
     display: flex;
+    align-items: center;
     z-index: 400;
     padding: 2px;
     border: 1px solid var(--SYellow);
@@ -19,6 +20,11 @@
     margin-right: 3px;
     cursor: pointer;
   }
+
+.nav--map-top-menu .material-icons {
+  font-size: 32px;
+  transform: translateY(4px); 
+}
   
   .nav--map-top-buttons {
     margin-left: auto;
@@ -49,13 +55,17 @@
         }
 
         .material-icons {
-          font-size: 14px !important;
+          font-size: 18px !important;
           align-self: center;
         }
 
         .nav--map-top-menu {
           margin: 2px;
           align-self: center;
+        }
+
+        .rotate-icon {
+          visibility: hidden;
         }
 
         .nav--map-title {
@@ -75,7 +85,6 @@
     visibility: unset;
     opacity: 1;
     transform: translateX(0);
-    width: 200px;
   }
   
   .nav--outer-container {
@@ -85,6 +94,7 @@
     left: 0;
     top: 50px;
     width: 200px;
+    height: 300px;
     text-align: center;
     z-index: 450;
   }
@@ -100,7 +110,6 @@
   .nav--button-container {
     display: flex;
     flex-direction: column;
-    border: 1px solid red;
   }
   
   .nav--button {
@@ -121,16 +130,11 @@
       font-size: 14ps;
     }
   
-
-
-
   }
 /* -- Side Navigation End */
  
 
-
-
-  /* Modal styles */
+/* Modal styles for Add Title, Add Stops, Add Users*/
   .modal--overlay {
     position: fixed;
     top: 0;
@@ -148,7 +152,7 @@
     background-color: white;
     border-radius: 8px;
     padding: 20px;
-    width: 400px;
+    width: 600px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   }
   
@@ -156,20 +160,37 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
   }
-  
+
+  .modal--title {
+    padding: 0;
+    margin: 10px auto 10px auto;
+  }
+   
   .modal--close-button {
-    background-color: transparent;
+    background: none;
     border: none;
-    font-size: 18px;
+    font-size: 20px;
+    color: var(--sDarkBlue);
     cursor: pointer;
   }
-  
+
   .modal--body {
     display: flex;
     flex-direction: column;
     gap: 10px;
+  }
+
+  .modal--label {
+    font-size: 14px;
+    padding: 0;
+    margin: 20px 0 0 0;
+  }
+
+  .modal--footer {
+    display: flex;
+    justify-content: center;
+    gap: 10px; 
   }
   
   .modal--button {
@@ -180,12 +201,36 @@
     border-radius: 5px;
     cursor: pointer;
     text-align: center;
+    width: 150px;
   }
   
   .modal--button:hover {
     background-color: var(--SYellow);
     color: var(--sDarkBlue);
   }
+
+  .modal--textarea {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid var(--SYellow);
+    border-radius: 4px;
+    resize: none;
+    margin-bottom: 20px;
+  }
+  
+  .modal--footer {
+    display: flex;
+    justify-content: center;
+    gap: 10px; /* Space between the Search and Save buttons */
+  }
+  
+
+
+
+
+
+
 
 
   /* User Select - temporary   */

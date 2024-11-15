@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import './addStops.css';
+import './navigation.css';
 import mapboxSdk from '@mapbox/mapbox-sdk/services/geocoding';
 import { db } from '../utils/firebase';
 import { collection, doc, setDoc } from 'firebase/firestore';
@@ -103,23 +103,23 @@ const AddStops = ({ onClose, tripID, mapboxAccessToken }) => {
     <div className="modal--overlay">
       <div className="modal--content">
         <div className="modal--header">
-          <h2>Set Trip Stops</h2>
+          <h2 className='modal--title'>Set Trip Stops</h2>
           <button className="modal--close-button" onClick={onClose}>X</button>
         </div>
         <div className="modal--body">
           <textarea
             value={stopsText}
             onChange={(e) => setStopsText(e.target.value)}
-            placeholder="Enter each stop on a new line"
+            placeholder="Enter each stop on a new line. Include 2 letter state abbreviation"
             rows="10"
             className="modal--textarea"
           />
         </div>
         <div className="modal--footer">
-          <button className="modal--save-button" onClick={geocodeStops} disabled={loading}>
-            {loading ? 'Searching...' : 'Search'}
+          <button className="modal--button" onClick={geocodeStops} disabled={loading}>
+            {loading ? 'Searching...' : 'Confirm Valid'}
           </button>
-          <button className="modal--save-button" onClick={handleSave}>Save</button>
+          <button className="modal--button" onClick={handleSave}>Save to Cloud</button>
         </div>
       </div>
     </div>

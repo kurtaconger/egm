@@ -67,22 +67,16 @@ function Navigation({
               <MenuIcon className="material-icons" style={{ fontSize: '32px', cursor: 'pointer' }} onClick={toggleNav} />
             )}
           </div>
-          <div className='nav--map-title'>THIS IS TO MAKE TITLE LARGER {tripTitle}</div>
+          <div className='nav--map-title'>{tripTitle}</div>
         </div>
         <div className='nav--map-top-buttons'>
-          <AutorenewIcon className="material-icons" style={{ fontSize: '32px', cursor: 'pointer', marginRight: '10px', verticalAlign: 'middle' }} onClick={rotateMap} />
+          <AutorenewIcon className="material-icons rotate-icon" style={{ fontSize: '32px', cursor: 'pointer', marginRight: '10px', verticalAlign: 'middle' }} onClick={rotateMap} />
           <LoupeIcon className="material-icons" style={{ fontSize: '32px', cursor: 'pointer', marginRight: '10px', verticalAlign: 'middle' }} onClick={toggleMapPopups} />
           {user ? (
             <Avatar
               src={user.photoURL || ''}
               alt={user.displayName || ''}
-              style={{
-                cursor: 'pointer',
-                width: '32px',
-                height: '32px',
-                marginRight: '10px',
-                display: 'inline-flex',
-                verticalAlign: 'middle'
+              style={{ cursor: 'pointer', width: '32px', height: '32px', marginRight: '10px', display: 'inline-flex', verticalAlign: 'middle'
               }}
               onClick={handleLogout}
             >

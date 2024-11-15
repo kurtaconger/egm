@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import './addUser.css';
+import './navigation.css';
 import { db } from '../utils/firebase';
 import { collection, doc, setDoc } from 'firebase/firestore';
 
@@ -77,7 +77,7 @@ const AddUser = ({ onClose, tripID }) => {
     <div className="modal--overlay">
       <div className="modal--content">
         <div className="modal--header">
-          <h2>Set User List</h2>
+          <h2 className='modal--title'>Set User List</h2>
           <button className="modal--close-button" onClick={onClose}>X</button>
         </div>
         <div className="modal--body">
@@ -91,8 +91,8 @@ const AddUser = ({ onClose, tripID }) => {
           {message && <p className="modal--message">{message}</p>}
         </div>
         <div className="modal--footer">
-          <button className="modal--save-button" onClick={checkValidEmail} disabled={loading}>Validate emails</button>
-          <button className="modal--save-button" onClick={handleSave} disabled={loading}>Save User List</button>
+          <button className="modal--button" onClick={checkValidEmail} disabled={loading}>Validate emails</button>
+          <button className="modal--button" onClick={handleSave} disabled={loading}>Save User List</button>
         </div>
       </div>
     </div>
