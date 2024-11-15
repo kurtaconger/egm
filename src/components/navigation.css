@@ -1,4 +1,6 @@
+
 /* Navigation and Title */
+/* -- Top bar - start  */
 .nav--map-top-row {
   width: 100vw;
   display: flex;
@@ -12,12 +14,18 @@
     background-color: white;
   }
 
-  .nav--map-top-buttons {
+  .nav--map-top-menu {
     margin-left: auto;
-    margin-right: 20px;
+    margin-right: 3px;
     cursor: pointer;
   }
   
+  .nav--map-top-buttons {
+    margin-left: auto;
+    margin-right: 3px;
+    cursor: pointer;
+  }
+
   .nav--menu-svg {
     margin: 0;
     z-index: 400;
@@ -25,14 +33,44 @@
   
   .nav--map-title {
     font-size: 22px;
-    font-family: 'Roboto';
-    margin-right: 30px;
+    margin-right: 10px;
     margin-top: 5px;
     padding: 0;
     font-weight: 700;
     color: var(--sDarkBlue);
   }
-  
+
+/* Mobile-specific styles */
+@media only screen and (max-width: 600px) {
+
+        .nav--map-title-container {
+          border: none;
+          padding: 0;
+        }
+
+        .material-icons {
+          font-size: 14px !important;
+          align-self: center;
+        }
+
+        .nav--map-top-menu {
+          margin: 2px;
+          align-self: center;
+        }
+
+        .nav--map-title {
+          margin: 5px;
+          margin-bottom: 0px;;
+          padding: 0;
+          font-weight: 400;
+          font-size: 12px;
+          align-self: center;
+          border: none !important;
+        }
+}
+/* -- Top bar - stop  */
+
+ /* -- Side Navigation  */
   .nav--open-nav {
     visibility: unset;
     opacity: 1;
@@ -40,7 +78,6 @@
     width: 200px;
   }
   
-  /* Navigation menu initially hidden */
   .nav--outer-container {
     position: fixed;
     background: var(--sDarkBlue);
@@ -60,16 +97,10 @@
     cursor: pointer;
     width: 1em;
   }
-  
-  .nav--title {
-    margin-bottom: 0;
-    color: white;
-    font-size: 22px;
-  }
-  
   .nav--button-container {
     display: flex;
     flex-direction: column;
+    border: 1px solid red;
   }
   
   .nav--button {
@@ -78,8 +109,27 @@
     padding: 6px;
     color: var(--sDarkBlue);
     margin: 10px 20px;
+    cursor: pointer;
   }
   
+  @media only screen and (max-width: 600px) {
+    .nav--open-nav {
+      width: 150px;
+    }
+  
+    .nav--button {
+      font-size: 14ps;
+    }
+  
+
+
+
+  }
+/* -- Side Navigation End */
+ 
+
+
+
   /* Modal styles */
   .modal--overlay {
     position: fixed;

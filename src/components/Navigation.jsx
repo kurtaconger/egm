@@ -6,6 +6,10 @@ import AddStops from './AddStops';
 import AddUser from './AddUser';
 import Account from './Account';
 import LoginIcon from '@mui/icons-material/Login';
+import CloseIcon from '@mui/icons-material/Close';
+import MenuIcon from '@mui/icons-material/Menu';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
+import LoupeIcon from '@mui/icons-material/Loupe';
 import { Avatar } from '@mui/material';
 import { getAuth, signOut } from 'firebase/auth';
 
@@ -56,18 +60,18 @@ function Navigation({
     <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 400 }}>
       <div className='nav--map-top-row'>
         <div className='nav--map-title-container'>
-          <div className='nav--map-top-buttons'>
-            <i className="material-icons" style={{ fontSize: '32px' }} onClick={toggleNav}>menu</i>
+          <div className='nav--map-top-menu'>
+            {isNavOpen ? (
+              <CloseIcon className="material-icons" style={{ fontSize: '32px', cursor: 'pointer' }} onClick={toggleNav} />
+            ) : (
+              <MenuIcon className="material-icons" style={{ fontSize: '32px', cursor: 'pointer' }} onClick={toggleNav} />
+            )}
           </div>
-          <div className='nav--map-title'>{tripTitle}</div>
+          <div className='nav--map-title'>THIS IS TO MAKE TITLE LARGER {tripTitle}</div>
         </div>
         <div className='nav--map-top-buttons'>
-          <i className="material-icons" style={{ fontSize: '32px', cursor: 'pointer', marginRight: '10px', verticalAlign: 'middle' }} onClick={rotateMap}>
-            autorenew
-          </i>
-          <i className="material-icons" style={{ fontSize: '32px', cursor: 'pointer', marginRight: '10px', verticalAlign: 'middle' }} onClick={toggleMapPopups}>
-            loupe
-          </i>
+          <AutorenewIcon className="material-icons" style={{ fontSize: '32px', cursor: 'pointer', marginRight: '10px', verticalAlign: 'middle' }} onClick={rotateMap} />
+          <LoupeIcon className="material-icons" style={{ fontSize: '32px', cursor: 'pointer', marginRight: '10px', verticalAlign: 'middle' }} onClick={toggleMapPopups} />
           {user ? (
             <Avatar
               src={user.photoURL || ''}
@@ -85,7 +89,7 @@ function Navigation({
               {!user.photoURL && user.displayName ? user.displayName[0] : null}
             </Avatar>
           ) : (
-            <LoginIcon style={{ fontSize: '32px', cursor: 'pointer', marginRight: '10px', verticalAlign: 'middle' }} onClick={handleAccountButtonClick} />
+            <LoginIcon className="material-icons" style={{ fontSize: '32px', cursor: 'pointer', marginRight: '10px', verticalAlign: 'middle' }} onClick={handleAccountButtonClick} />
           )}
         </div>
       </div>
@@ -145,5 +149,3 @@ function Navigation({
 }
 
 export default Navigation;
-
-

@@ -12,7 +12,7 @@
 }
 
 body, html, #root {
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Poppins';
   margin: 0;
   padding: 0;
   height: 100%;
@@ -129,13 +129,14 @@ body, html, #root {
 /* Mobile-specific styles */
 @media only screen and (max-width: 600px) {
   .map--popup-container {
-    width: 100px;
-    padding: 5px; /* Increase padding for better touch accessibility */
-    margin-bottom: 10px; /* Increase margin for better spacing */
-    background-color: #f8f8f8; /* Softer background color for better readability */
-    border: 1px solid var(--SYellow); /* Adding a subtle border */
-    border-radius: 8px; /* Slightly more rounded corners */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Slightly stronger shadow */
+    width: 100px !important;
+    padding: 5px;
+    margin-bottom: 10px;
+    background-color: #f8f8f8; 
+    border: 1px solid var(--SYellow);
+    border-radius: 8px; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid red;
   }
 
   .map--popup-image {
