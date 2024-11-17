@@ -12,13 +12,6 @@ const firebaseConfig = {
     messagingSenderId: '509277052904',
     appId: '1:509277052904:web:1122937f1d33c2a2540e5d',
 };
-// const tripNameData = '2024-01-CARIBBEAN-DATA'
-// const tripNameApp = '2024-01-CARIBBEAN-APP'
-const tripNameData = '2024-02-BVI-DATA'
-const tripNameApp = '2024-02-BVI-APP'
-// const tripNameData = '2024-07-LI-SAIL-DATA'
-// const tripNameApp = '2024-07-LI-SAIL-APP'
-
 
 // Ensure Firebase app is initialized only once
 let app;
@@ -44,4 +37,4 @@ signInAnonymously(auth)
         console.error('Error signing in:', error);
     });
 
-export { db, storage, tripNameData, tripNameApp };
+export { db, storage };

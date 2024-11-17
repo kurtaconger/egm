@@ -58,12 +58,12 @@ body, html, #root {
   border-radius: 5px;
   padding: 5px;
   margin-bottom: 5px;
+  cursor: pointer;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);  /* Optional: Add a subtle shadow */
 }
 
 .map--popup-title {
   padding: 4pt 5pt;  /* Increased padding slightly for better visual balance */
-  font-family: 'Roboto';
   font-size: 9pt;  /* Adjusted font size for slightly better readability */
   font-weight: bold;
   margin: 0;
@@ -128,34 +128,32 @@ body, html, #root {
 
 /* Mobile-specific styles */
 @media only screen and (max-width: 600px) {
-  .map--popup-container {
-    width: 100px !important;
-    padding: 5px;
-    margin-bottom: 10px;
-    background-color: #f8f8f8; 
-    border: 1px solid var(--SYellow);
-    border-radius: 8px; 
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border: 1px solid red;
-  }
+          .map--popup-container {
+            width: 100px !important;
+            padding: 5px;
+            margin-bottom: 10px;
+            background-color: #f8f8f8; 
+            border: 1px solid var(--SYellow);
+            border-radius: 8px; 
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          }
 
-  .map--popup-image {
-    display: none;
-  }
+          .map--popup-image {
+            display: none;
+          }
 
-  .map--popup-title {
-    font-size: 8pt;
-    font-weight: bold;
-    margin: 2px 0; /* Add margin for better spacing */
-    color: #333;
+          .map--popup-title {
+            font-size: 8pt;
+            margin: 2px 0; /* Add margin for better spacing */
+            color: #333;
 
-  }
+          }
 
-  .map--popup-container.mobile {
-    width: 100px;
-    padding: 10px;
-    text-align: center; /* Ensuring centered content */
-  }
+          .map--popup-container.mobile {
+            width: 100px;
+            padding: 10px;
+            text-align: center; /* Ensuring centered content */
+          }
 
 
 }

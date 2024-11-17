@@ -1,5 +1,5 @@
 import { collection, getDocs } from 'firebase/firestore';
-import { db, tripNameData } from './firebase'; // Import Firestore instance and tripNameData
+import { db } from './firebase'; // Import Firestore instance and tripNameData
 
 export const loadLocations = async (tripID) => {
   try {

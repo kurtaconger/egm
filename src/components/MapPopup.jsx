@@ -63,7 +63,7 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
   useEffect(() => {
     const fetchMedia = async () => {
       if (isOpen && currentMarker) {
-        const media = await loadMedia(currentMarker);
+        const media = await loadMedia(currentMarker, tripID);
         setFormattedMedia(media);
       }
     };

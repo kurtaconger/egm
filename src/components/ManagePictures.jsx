@@ -1,228 +1,214 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { handleRetrieveGPS } from '../utils/retrieveGPS'; // Import the GPS retrieval utility
-import { handleConvertHeicToJpg } from '../utils/fileUtil'; // Import the file utilities
-import { findClosestLocation } from '../utils/findClosestLocation'; // Import the closest location utility
-import { db, storage, tripNameData } from '../utils/firebase'; // Import Firebase Firestore database instance and storage
-import { ref, uploadBytes } from 'firebase/storage'; // Import Firebase storage methods
-import { updateMetadataForClosestLocations } from '../utils/updateMetadata'; // Import the metadata utility
-import ProcessNonGPS from './ProcessNonGPS'; // Combined component for handling both personal and stock pictures
+import heic2any from 'heic2any';
+import { handleRetrieveGPS } from '../utils/retrieveGPS';
+import { findClosestLocation } from '../utils/findClosestLocation';
+import { ref, uploadBytes } from 'firebase/storage';
+import { db, storage } from '../utils/firebase';
+import { updateDoc, doc, arrayUnion } from 'firebase/firestore';
 import './managePictures.css';
+
+// Function to add a timestamp to console.log messages
+const logWithTimestamp = (message, ...optionalParams) => {
+    const now = new Date();
+    const timeString = now.toTimeString().split(' ')[0]; // hh:mm:ss
+    console.log(`[${timeString}] ${message}`, ...optionalParams);
+};
 
 function ManagePictures({ isPictureModalOpen, closePictureModal, tripID }) {
     const [selectedFiles, setSelectedFiles] = useState([]);
-    const [filesUploaded, setFilesUploaded] = useState(false);
-    const [gpsData, setGpsData] = useState([]);
-    const [gpsRetrieved, setGpsRetrieved] = useState(false);
-    const [filesSaved, setFilesSaved] = useState(false);
-    const [displayReferences, setDisplayReferences] = useState([]); // The "personal_display" paths
-    const [heicConverted, setHeicConverted] = useState(false);
+    const [uploadedFiles, setUploadedFiles] = useState([]);
     const [closestLocations, setClosestLocations] = useState([]);
-    const [closestLocationsFound, setClosestLocationsFound] = useState(false);
-    const [metadataUpdated, setMetadataUpdated] = useState(false);
-    const [showNonGPSModal, setShowNonGPSModal] = useState(false);
-    const [showStockModal, setShowStockModal] = useState(false);
+    const [filesWithoutGPS, setFilesWithoutGPS] = useState([]);
+    const [errors, setErrors] = useState([]);
+    const [processingMessage, setProcessingMessage] = useState("");
 
-    // Handle file selection for GPS files
-    const handlePersonalGPSButton = (event) => {
-        const files = Array.from(event.target.files);
+    const handleFileSelection = async (event) => {
+        const files = Array.from(event.target.files).filter(file =>
+            file.name.toLowerCase().endsWith('.jpg') ||
+            file.name.toLowerCase().endsWith('.jpeg') ||
+            file.name.toLowerCase().endsWith('.png') ||
+            file.name.toLowerCase().endsWith('.heic') ||
+            file.name.endsWith('.HEIC')
+        );
+
+        logWithTimestamp("Selected files:", files);
+
         setSelectedFiles(files);
-        setFilesUploaded(true);
-        setGpsData([]);
-        setGpsRetrieved(false);
-    };
+        setUploadedFiles([]);
+        setClosestLocations([]);
+        setFilesWithoutGPS([]);
+        setErrors([]);
+        setProcessingMessage("Files being processed, please wait.");
 
-    // Open the modal for non-GPS personal pictures
-    const handleOpenNonGPSModal = () => {
-        setShowNonGPSModal(true);
-    };
+        if (files.length === 0) {
+            logWithTimestamp("No valid files selected.");
+            setProcessingMessage("No valid files selected.");
+            return;
+        }
 
-    // Open the modal for stock pictures
-    const handleOpenStockModal = () => {
-        setShowStockModal(true);
-    };
-
-    // Save original and converted files to Firebase
-    const handleSaveToFirebase = async () => {
-        const firebaseRefsOriginal = [];
-
-        for (let file of selectedFiles) {
-            // Upload original files to personal_original
-            const originalStorageRef = ref(storage, `personal_original/${file.name}`);
+        // Convert HEIC files
+        const heicFiles = files.filter(file => file.name.toLowerCase().endsWith('.heic') || file.name.endsWith('.HEIC'));
+        const converted = [];
+        for (let file of heicFiles) {
             try {
-                const originalSnapshot = await uploadBytes(originalStorageRef, file);
-                const originalFirebaseRef = originalSnapshot.metadata.fullPath;
-                firebaseRefsOriginal.push({ fileName: file.name, firebaseRef: `gs://${originalStorageRef.bucket}/${originalFirebaseRef}` });
+                const blob = await heic2any({
+                    blob: file,
+                    toType: 'image/jpeg',
+                });
+                const jpgFile = new File([blob], file.name.replace(/\.[Hh][Ee][Ii][Cc]$/, '.jpg'), {
+                    type: 'image/jpeg',
+                });
+                converted.push(jpgFile);
+                logWithTimestamp(`Converted HEIC file: ${file.name} to JPG: ${jpgFile.name}`);
             } catch (error) {
-                console.error(`Error uploading original file: ${file.name}`, error);
+                const errorMsg = `Error converting HEIC file: ${file.name}`;
+                logWithTimestamp(errorMsg, error);
+                setErrors(prevErrors => [...prevErrors, errorMsg]);
             }
         }
 
-        // Convert HEIC files to JPG and save to personal_display
-        await handleConvertHeicToJpg(selectedFiles, setDisplayReferences, setHeicConverted);
-        if (firebaseRefsOriginal.length > 0) {
-            setFilesSaved(true); // Mark files as saved
-        } else {
-            console.error("No files were saved.");
-        }
-    };
-
-    // Function to convert HEIC files to JPG and save converted files to Firebase
-    const handleConvertHeicFiles = async () => {
-        await handleConvertHeicToJpg(selectedFiles, setDisplayReferences, setHeicConverted);
-        console.log('HEIC files converted and saved to personal_display');
-    };
-
-    // Retrieve GPS data and associate it with files
-    const handleRetrieveGPSData = async () => {
-        await handleRetrieveGPS(selectedFiles, setGpsData);
-        setGpsRetrieved(true);
-    };
-
-    // Find the closest location for files with GPS
-    const handleFindClosestLocations = async () => {
-        const closestLocationList = await findClosestLocation(db, tripID, gpsData, displayReferences);
-        setClosestLocations(closestLocationList);
-        setClosestLocationsFound(true);
-    };
-
-    // Update metadata for closest locations with personal_display path
-    const handleUpdateMetadata = async () => {
-        const updatedFileData = closestLocations.map((fileData) => {
-            const displayRef = displayReferences.find(ref => ref.fileName === fileData.fileName.replace(/\.[Hh][Ee][Ii][Cc]$/, '.jpg'));
-            return {
-                ...fileData,
-                fullPath: displayRef?.firebaseRef
-            };
+        // Retrieve GPS data
+        let gpsResults = [];
+        await handleRetrieveGPS(files, (results) => {
+            logWithTimestamp("GPS results in callback:", results);
+            gpsResults = results;
         });
 
-        const success = await updateMetadataForClosestLocations(db, tripID, updatedFileData);
-        if (success) {
-            setMetadataUpdated(true);
+        logWithTimestamp("GPS results before proceeding:", gpsResults);
+
+        // Upload only converted files and other non-HEIC files
+        const filesToUpload = [...converted, ...files.filter(file => !file.name.toLowerCase().endsWith('.heic'))];
+        const uploaded = [];
+        for (let file of filesToUpload) {
+            const storageRef = ref(storage, `uploaded_media/${file.name}`);
+            try {
+                const snapshot = await uploadBytes(storageRef, file);
+                const fileRef = snapshot.metadata.fullPath;
+                uploaded.push({ fileName: file.name, fileRef });
+                logWithTimestamp(`Uploaded ${file.name} to Firebase storage: ${fileRef}`);
+            } catch (error) {
+                const errorMsg = `Error uploading ${file.name} to Firebase Storage`;
+                logWithTimestamp(errorMsg, error);
+                setErrors(prevErrors => [...prevErrors, errorMsg]);
+            }
         }
+
+        setUploadedFiles(uploaded);
+        setProcessingMessage("");
+
+        // Map GPS data with fileRefs
+        const gpsDataWithRefs = gpsResults.map((gpsData) => {
+            const jpgFileName = gpsData.file.name.replace(/\.[Hh][Ee][Ii][Cc]$/, '.jpg');
+            const matchingUpload = uploaded.find(upload => upload.fileName === jpgFileName);
+            return {
+                ...gpsData,
+                fileRef: matchingUpload?.fileRef || null,
+            };
+        }).filter(data => data.fileRef); // Filter out invalid entries
+
+        logWithTimestamp("Mapped GPS data with file references:", gpsDataWithRefs);
+
+        // Find closest locations
+        if (gpsDataWithRefs.length > 0) {
+            const closest = await findClosestLocation(db, tripID, gpsDataWithRefs);
+            logWithTimestamp("Closest locations returned:", closest);
+            setClosestLocations(closest);
+
+            // Update Firestore
+            for (let location of closest) {
+                if (location.documentId && location.fileRef) {
+                    const locationRef = doc(db, `MAP-${tripID}-DATA`, location.documentId);
+
+                    try {
+                        await updateDoc(locationRef, {
+                            media: arrayUnion(location.fileRef),
+                        });
+                        logWithTimestamp(`Stored ${location.fileName} at ${location.closestLocationName} in media array`);
+                    } catch (error) {
+                        const errorMsg = `Error storing ${location.fileName} at ${location.closestLocationName}`;
+                        logWithTimestamp(errorMsg, error);
+                        setErrors(prevErrors => [...prevErrors, errorMsg]);
+                    }
+                } else {
+                    logWithTimestamp(`Skipping location for ${location.fileName} as it has no documentId or fileRef`);
+                }
+            }
+        } else {
+            logWithTimestamp("No GPS data with file references to process.");
+        }
+
+        // Collect files without GPS data
+        const filesWithoutGPS = files.filter(file => !gpsResults.some(gps => gps.file.name === file.name));
+        setFilesWithoutGPS(filesWithoutGPS.map(file => file.name));
     };
 
     return (
         <div>
             {isPictureModalOpen && (
-                <div className='pict-modal--overlay'>
-                    <div className='pict-modal--content'>
-                        <div className='pict-modal--header'>
-                            <div className='pict-modal--title'>Picture Functions</div>
-                            <button className='pict-modal--close-button' onClick={() => { closePictureModal() }}>X</button>
+                <div className="pict-modal--overlay">
+                    <div className="pict-modal--content">
+                        <div className="pict-modal--header">
+                            <div className="pict-modal--title">Upload Pictures</div>
+                            <button
+                                className="pict-modal--close-button"
+                                onClick={closePictureModal}
+                            >
+                                X
+                            </button>
                         </div>
-                        <div className='pict-modal--body'>
-                            <div className='pict-modal--button-container'>
-                                {!filesUploaded && (
-                                    <label className='pict-modal--button'>
-                                        Upload Personal Pictures with GPS
-                                        <input
-                                            type="file"
-                                            multiple
-                                            style={{ display: 'none' }}
-                                            onChange={handlePersonalGPSButton}
-                                        />
-                                    </label>
-                                )}
-                                {!filesUploaded && (
-                                    <button className='pict-modal--button' onClick={handleOpenNonGPSModal}>
-                                        Upload Personal Pictures without GPS
-                                    </button>
-                                )}
-                                {!filesUploaded && (
-                                    <button className='pict-modal--button' onClick={handleOpenStockModal}>
-                                        Upload Stock Pictures
-                                    </button>
-                                )}
-                            </div>
-                            <div className='pict-modal--progress-message-box'>
-                                {selectedFiles.length > 0 && !gpsRetrieved ? (
-                                    <>
-                                        <p>1. The following files were selected:</p>
-                                        <ul className="pict-modal--list">
-                                            {selectedFiles.map((file, index) => (
-                                                <li key={index}>{file.name}</li>
-                                            ))}
-                                        </ul>
-                                        <button className='pict-modal--button' onClick={handleRetrieveGPSData}>
-                                            2. Retrieve GPS coordinates
-                                        </button>
-                                    </>
-                                ) : gpsRetrieved && !heicConverted ? (
-                                    <>
-                                        <p>2. GPS Coordinates for Files:</p>
-                                        <ul className="pict-modal--list">
-                                            {selectedFiles.map((file, index) => {
-                                                const gpsInfo = gpsData[index];
-                                                const latitude = gpsInfo?.latitude || 'NA';
-                                                const longitude = gpsInfo?.longitude || 'NA';
-                                                return (
-                                                    <li key={index}>{`File: ${file.name}, GPS: (${latitude}, ${longitude})`}</li>
-                                                );
-                                            })}
-                                        </ul>
-                                        <button className='pict-modal--button' onClick={handleConvertHeicFiles}>
-                                            3. Convert HEIC to JPG
-                                        </button>
-                                    </>
-                                ) : heicConverted && !filesSaved ? (
-                                    <>
-                                        <p>HEIC files converted. All files saved to personal_display.</p>
-                                        <button className='pict-modal--button' onClick={handleSaveToFirebase}>
-                                            4. Save Files to Firebase
-                                        </button>
-                                    </>
-                                ) : filesSaved && !closestLocationsFound ? (
-                                    <>
-                                        <p>Files saved to Firebase:</p>
-                                        <ul className="pict-modal--list">
-                                            {displayReferences.map((ref, index) => (
-                                                <li key={index}>
-                                                    {`File ${ref.fileName} has Firebase reference ${ref.firebaseRef}`}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                        <button className='pict-modal--button' onClick={handleFindClosestLocations}>
-                                            5. Find closest location for files with GPS
-                                        </button>
-                                    </>
-                                ) : closestLocationsFound && !metadataUpdated ? (
-                                    <>
-                                        <p>Distances to closest location:</p>
-                                        <ul className="pict-modal--list">
-                                            {closestLocations.map((fileData, index) => (
-                                                <li key={index}>
-                                                    {`File ${fileData.fileName} is closest to ${fileData.closestLocationName} (${fileData.distance} miles)`}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                        <button className='pict-modal--button' onClick={handleUpdateMetadata}>
-                                            6. Update Metadata for closest location
-                                        </button>
-                                    </>
-                                ) : metadataUpdated ? (
-                                    <>
-                                        <p>Update complete.</p>
-                                        <button className='pict-modal--button' onClick={() => { closePictureModal() }}>
-                                            Close
-                                        </button>
-                                    </>
-                                ) : (
-                                    "Status of image processing"
-                                )}
-                            </div>
+
+                        <div className="pict-modal--body">
+                            <label className="pict-modal--button">
+                                Select Files
+                                <input
+                                    type="file"
+                                    multiple
+                                    accept=".jpg,.jpeg,.png,.heic,.HEIC"
+                                    style={{ display: 'none' }}
+                                    onChange={handleFileSelection}
+                                />
+                            </label>
+
+                            {processingMessage && (
+                                <div className="pict-modal--list">
+                                    <p>{processingMessage}</p>
+                                </div>
+                            )}
+
+                            {closestLocations.length > 0 && (
+                                <div className="pict-modal--list">
+                                    <h4>Pictures Saved at Closest Spot:</h4>
+                                    <ul>
+                                        {closestLocations.map((location, index) => (
+                                            <li key={index}>
+                                                {location.fileName.replace(/\.[Hh][Ee][Ii][Cc]$/, '.jpg')} stored at {location.closestLocationName} ({location.distance} mi)
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+
+                            {filesWithoutGPS.length > 0 && (
+                                <div className="pict-modal--list">
+                                    <h4>The following files do not have GPS coordinates, load using 'Load Pictures without GPS' button:</h4>
+                                    <p>{filesWithoutGPS.join(', ')}</p>
+                                </div>
+                            )}
+
+                            {errors.length > 0 && (
+                                <div className="pict-modal--list">
+                                    <h4>Errors:</h4>
+                                    <ul>
+                                        {errors.map((error, index) => (
+                                            <li key={index}>{error}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
-            )}
-
-            {showNonGPSModal && (
-                <ProcessNonGPS
-                    onCancel={() => setShowNonGPSModal(false)} // Close the modal
-                    firebaseFolder="personal_display" // For personal pictures
-                    firestoreField="personalPictures" // Field in Firestore
-                    tripID={tripID}
-                />
             )}
         </div>
     );
@@ -231,6 +217,9 @@ function ManagePictures({ isPictureModalOpen, closePictureModal, tripID }) {
 ManagePictures.propTypes = {
     isPictureModalOpen: PropTypes.bool.isRequired,
     closePictureModal: PropTypes.func.isRequired,
+    tripID: PropTypes.string.isRequired,
 };
 
 export default ManagePictures;
+
+        

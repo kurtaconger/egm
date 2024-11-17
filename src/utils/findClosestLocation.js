@@ -18,30 +18,31 @@ export const haversineDistance = (lat1, lon1, lat2, lon2) => {
     return R * c; // Distance in miles
 };
 
-// Function to find closest locations based on GPS data and locations from Firestore
-export const findClosestLocation = async (db, tripID, gpsData, firebaseRefs) => {
-    const locationCollectionRef = collection(db, "MAP-" + tripID + "-DATA");
+export const findClosestLocation = async (db, tripID, gpsData) => {
+    console.log("Starting findClosestLocation function");
+    console.log("tripID:", tripID);
+    console.log("GPS Data:", gpsData);
+
+    const locationCollectionRef = collection(db, `MAP-${tripID}-DATA`);
+
     try {
         const locationSnapshot = await getDocs(locationCollectionRef);
         const locationList = locationSnapshot.docs.map((doc) => {
             const data = doc.data();
             return {
                 shortName: data.shortName || "Unknown Location",
-                lng: data.lng !== undefined ? data.lng : "Unknown Longitude",
-                lat: data.lat !== undefined ? data.lat : "Unknown Latitude",
+                lng: data.lng || "Unknown Longitude",
+                lat: data.lat || "Unknown Latitude",
+                id: doc.id, // Include the document ID
             };
         });
 
-        // For each file with GPS data, find the closest location
-        const closestLocationList = gpsData.map((fileData, index) => {
-            if (!fileData || !fileData.file || !fileData.latitude || !fileData.longitude) {
-                console.error('GPS or file data is missing for:', fileData);
-                return {
-                    fileName: 'Unknown',
-                    closestLocationName: 'Unknown Location',
-                    distance: 'N/A',
-                    fullPath: 'N/A'
-                };
+        console.log("Location List:", locationList);
+
+        const closestLocationList = gpsData.map((fileData) => {
+            if (!fileData.latitude || !fileData.longitude || !fileData.fileRef) {
+                console.warn(`Invalid GPS data or fileRef for file: ${fileData.file?.name}`);
+                return null;
             }
 
             let closestLocation = null;
@@ -54,25 +55,31 @@ export const findClosestLocation = async (db, tripID, gpsData, firebaseRefs) => 
                     location.lat,
                     location.lng
                 );
+
                 if (distance < minDistance) {
                     minDistance = distance;
-                    closestLocation = { locationName: location.shortName, distance };
+                    closestLocation = {
+                        locationName: location.shortName,
+                        documentId: location.id, // Include the document ID
+                        distance: minDistance.toFixed(2),
+                    };
                 }
             });
 
-            const fullPath = firebaseRefs[index] 
-                ? `gs://bvi-map2.appspot.com/${firebaseRefs[index].firebaseRef}` 
-                : "No Firebase reference found";
+            if (closestLocation) {
+                return {
+                    fileName: fileData.file.name,
+                    fileRef: fileData.fileRef,
+                    closestLocationName: closestLocation.locationName,
+                    documentId: closestLocation.documentId, // Include the document ID
+                    distance: closestLocation.distance,
+                };
+            }
 
-            return {
-                fileName: fileData.file.name, // Correctly access the file name
-                closestLocationName: closestLocation ? closestLocation.locationName : 'Unknown Location',
-                distance: minDistance !== Infinity ? minDistance.toFixed(2) : 'N/A', // Rounds distance to 2 decimal places
-                fullPath: fullPath // Include the full Firebase storage path
-            };
+            return null; // No closest location found
         });
 
-        return closestLocationList; // Return the closest locations for each file
+        return closestLocationList.filter((loc) => loc !== null); // Remove null entries
     } catch (error) {
         console.error("Error fetching locations:", error);
         return [];
