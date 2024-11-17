@@ -68,7 +68,7 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
       }
     };
     fetchMedia();
-  }, [isOpen, currentMarker]);
+  }, [isOpen, currentMarker, tripID]);
 
   useEffect(() => {
     if (isOpen) {
@@ -81,6 +81,13 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
         }
       };
       loadVoices();
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setFormattedMedia([]); // Clear media state
+      setTabIndex(0); // Reset tabs to the default
     }
   }, [isOpen]);
 
@@ -207,4 +214,3 @@ MapPopup.propTypes = {
 };
 
 export default MapPopup;
-

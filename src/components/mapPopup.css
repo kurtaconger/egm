@@ -157,16 +157,28 @@
 }
 
 
-.image-gallery-image {
-  max-width: 100%;
-  height: 300px; /* Adjust this value as needed */
-  overflow: hidden;
-}
-
 .image-gallery-image video {
   max-width: 100%;
   max-height: 100%; /* Ensure the video scales within the container */
   object-fit: contain; /* Maintain aspect ratio */
+}
+
+
+
+.image-gallery-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.image-gallery-image img,
+.image-gallery-image video {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain; /* or use 'cover' if you prefer cropping */
 }
 
 

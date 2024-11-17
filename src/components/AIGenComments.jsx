@@ -29,7 +29,7 @@ const AIGenComments = ({ currentMarker, tripID, user }) => {
     const currentSpotName = currentMarker?.shortName || 'the location';
     const voiceNumber = 1;
     const initialQuestion = `What is the most memorable experience at your stop at ${currentSpotName}`;
-    const preQuestionForChatGPT = `The user was asked what is the most memorable experience at his visit to ${currentSpotName}, summarize his response which follows. Do not refer to the user or "this person" in your response`;
+    const preQuestionForChatGPT = `I was asked what is the most memorable experience visit to ${currentSpotName}, summarize my response which follows: `;
 
     // Reset component state when currentMarker changes
     useEffect(() => {
