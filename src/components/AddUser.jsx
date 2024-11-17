@@ -5,7 +5,7 @@ import { db } from '../utils/firebase';
 import { collection, doc, setDoc } from 'firebase/firestore';
 
 const AddUser = ({ onClose, tripID }) => {
-  console.log ("Add User. tripID " + tripID)
+  console.log("Add User. tripID " + tripID);
   const [emailAddresses, setEmailAddresses] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -26,13 +26,13 @@ const AddUser = ({ onClose, tripID }) => {
 
   function validateEmail(email) {
     const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    return emailPattern.test(email);
+    return emailPattern.test(email.toLowerCase());
   }
 
   const checkValidEmail = () => {
     const emails = emailAddresses.split('\n');
     const validatedEmails = emails.map((email) => {
-      email = email.trim();
+      email = email.trim().toLowerCase(); // Convert to lowercase
       return validateEmail(email) ? email : `>>INVALID: ${email}`;
     });
     setEmailAddresses(validatedEmails.join('\n'));
@@ -41,7 +41,7 @@ const AddUser = ({ onClose, tripID }) => {
   const handleSave = async () => {
     setLoading(true);
     setMessage('');
-    const emails = emailAddresses.split('\n').map(email => email.trim());
+    const emails = emailAddresses.split('\n').map(email => email.trim().toLowerCase()); // Convert to lowercase
     const validEmails = emails.filter(email => validateEmail(email));
     const invalidEmails = emails.filter(email => !validateEmail(email));
     const collectionName = `MAP-${tripID}-USERS`;

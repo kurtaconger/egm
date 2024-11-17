@@ -24,7 +24,7 @@ const TabPanel = ({ children, value, index, ...other }) => (
     {...other}
   >
     {value === index && (
-      <Box p={.4}>
+      <Box p={0.4}>
         <Typography component="div">{children}</Typography>
       </Box>
     )}
@@ -90,9 +90,11 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
   };
 
   const renderMediaItem = (item) => {
-    const style = isFullscreen
-      ? { width: '100vw', height: '100vh', objectFit: 'cover' }
-      : { width: '100%', height: 'auto', maxHeight: '330px', objectFit: 'contain' };
+    const style = {
+      width: '100%',
+      height: '100%',
+      objectFit: 'contain', // Ensures the entire image is visible without cropping
+    };
 
     if (item.isVideo) {
       return (
@@ -104,7 +106,11 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
         </div>
       );
     }
-    return <img src={item.original} alt="" style={style} />;
+    return (
+      <div className={`image-gallery-image ${isFullscreen ? 'fullscreen' : ''}`}>
+        <img src={item.original} alt="" style={style} />
+      </div>
+    );
   };
 
   if (!isOpen || !currentMarker) return null;
@@ -157,33 +163,28 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
                   additionalClass="image--custom-image-gallery"
                   renderItem={renderMediaItem}
                   useBrowserFullscreen={true}
-                  onScreenChange={(fullscreen) => setIsFullscreen(fullscreen)}
+                  onScreenChange={(isFullscreen) => setIsFullscreen(isFullscreen)}
                 />
               </TabPanel>
             )}
             {tabIndex === 1 && (
               <TabPanel value={tabIndex} index={1}>
-                <AIGenComments 
-                    currentMarker={currentMarker}
-                    tripID={tripID}
-                    user={user}
-                    resetAIInterview={tabIndex === 1} // Added to reset AI Interview when tab is active
-                  />
+                <AIGenComments
+                  currentMarker={currentMarker}
+                  tripID={tripID}
+                  user={user}
+                  resetAIInterview={tabIndex === 1}
+                />
               </TabPanel>
             )}
             {tabIndex === 2 && (
               <TabPanel value={tabIndex} index={2}>
-                <ManageComments 
-                  user={user} 
-                  currentMarker={currentMarker} 
-                  tripID={tripID} />
+                <ManageComments user={user} currentMarker={currentMarker} tripID={tripID} />
               </TabPanel>
             )}
-              <TabPanel value={tabIndex} index={3}>
-                <CommentsSummery 
-                  currentMarker={currentMarker} 
-                  tripID={tripID}/>
-              </TabPanel>
+            <TabPanel value={tabIndex} index={3}>
+              <CommentsSummery currentMarker={currentMarker} tripID={tripID} />
+            </TabPanel>
           </div>
         </div>
       </div>
@@ -206,3 +207,4 @@ MapPopup.propTypes = {
 };
 
 export default MapPopup;
+
