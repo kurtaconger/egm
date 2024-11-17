@@ -172,18 +172,6 @@
 
 
 
-
-@media (max-width: 600px) {
-  /* Adjustments for portrait pictures on iPhone */
-  .image--custom-image-gallery img,
-  .image--custom-image-gallery {
-      width: auto;
-      max-height: 90vh;
-  }
-}
-
-
-
 .image-gallery-slide-wrapper.fullscreen,
 .image-gallery-image.fullscreen {
   width: 100vw !important;
@@ -288,5 +276,35 @@
 .ai-gen-button:disabled {
   background-color: #b0b0b0;
   cursor: not-allowed;
+}
+
+
+
+@media (max-width: 600px) {
+  .popup--modal-overlay {
+    top: 50px; /* Adjust to ensure it starts below the title bar */
+    height: calc(100vh - 50px); /* Fill the space below the title */
+    z-index: 500;
+  }
+
+  .popup--modal-content {
+    width: 100vw; /* Full width */
+    height: 100%; /* Full height of the remaining screen space */
+    max-width: 100%; /* Override any max-width */
+    border-radius: 0; /* Remove rounded corners for a clean look */
+    padding: 0; /* Remove padding to maximize space */
+  }
+
+  .popup--display-container {
+    height: calc(100% - 50px); /* Adjust height to leave room for tabs */
+    overflow-y: auto; /* Ensure scrollability for overflowing content */
+  }
+
+  .image--custom-image-gallery img,
+  .image--custom-image-gallery {
+    height: 100%;
+    width: 100%;
+    object-fit: contain; /* Ensure images resize appropriately */
+  }
 }
 
