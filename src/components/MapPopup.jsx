@@ -60,6 +60,10 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
     setTabIndex(newValue);
   };
 
+  const handleExitFullScreen = () => {
+    setIsFullscreen(false); // Exit full-screen mode
+  };
+
   useEffect(() => {
     const fetchMedia = async () => {
       if (isOpen && currentMarker) {
@@ -169,9 +173,14 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
                   showPlayButton={false}
                   additionalClass="image--custom-image-gallery"
                   renderItem={renderMediaItem}
-                  useBrowserFullscreen={true}
+                  useBrowserFullscreen={!isMobile} // Disable browser fullscreen for mobile
                   onScreenChange={(isFullscreen) => setIsFullscreen(isFullscreen)}
                 />
+                {isMobile && isFullscreen && (
+                  <button className="exit-fullscreen-button" onClick={handleExitFullScreen}>
+                    Exit Full Screen
+                  </button>
+                )}
               </TabPanel>
             )}
             {tabIndex === 1 && (
@@ -214,3 +223,4 @@ MapPopup.propTypes = {
 };
 
 export default MapPopup;
+
