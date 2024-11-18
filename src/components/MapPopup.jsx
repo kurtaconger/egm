@@ -61,7 +61,8 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
   };
 
   const handleExitFullScreen = () => {
-    setIsFullscreen(false); // Exit full-screen mode
+    setIsFullscreen(false);
+    document.body.style.overflow = 'auto'; // Restore scrolling
   };
 
   useEffect(() => {
@@ -95,6 +96,18 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
     }
   }, [isOpen]);
 
+  // Force re-render on exit full-screen mode
+  useEffect(() => {
+    if (!isFullscreen) {
+      // Trigger layout update
+      const container = document.querySelector('.popup--modal-content');
+      if (container) {
+        container.style.transform = 'scale(1)'; // Reset scale (for Safari quirks)
+        container.offsetHeight; // Force reflow
+      }
+    }
+  }, [isFullscreen]);
+
   const handleRequestClose = () => {
     setTabIndex(0);
     onRequestClose();
@@ -104,7 +117,7 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
     const style = {
       width: '100%',
       height: '100%',
-      objectFit: 'contain', // Ensures the entire image is visible without cropping
+      objectFit: 'contain',
     };
 
     if (item.isVideo) {
@@ -223,4 +236,3 @@ MapPopup.propTypes = {
 };
 
 export default MapPopup;
-
