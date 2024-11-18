@@ -72,18 +72,19 @@
 /** IMAGE STYLING - BELOW **/
 
 .image-gallery-image {
+  border: 1px solid red ;
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: 90%; /* Adjusted for better portrait image fit */
+  height: 330px; 
   overflow: hidden;
 }
 
 .image-gallery-image img,
 .image-gallery-image video {
   max-width: 90%;
-  max-height: 90%; /* Prevents truncation at the bottom */
+  max-height: 1000%; /* Prevents truncation at the bottom */
   object-fit: contain;
 }
 
@@ -130,25 +131,28 @@
 }
 
 @media (max-width: 600px) {
-  .image--custom-image-gallery img,
-  .image--custom-image-gallery {
-    height: 100%;
-    width: 100%;
-    object-fit: contain;
-  }
 
-  .popup--modal-content {
-    width: 100vw;
-    height: 100%;
-    max-width: 100%;
-    border-radius: 0;
-    padding: 0;
-  }
 
-  .popup--display-container {
-    height: calc(100% - 50px); /* Adjust height to leave room for tabs */
-    overflow-y: auto;
-  }
+        .image--custom-image-gallery img,
+        .image--custom-image-gallery {
+          height: 100%;
+          width: 100%;
+          object-fit: contain;
+        }
+
+        .popup--modal-content {
+          width: 100vw;
+          height: 100%;
+          max-width: 100%;
+          border-radius: 0;
+          padding: 0;
+        }
+
+        .popup--display-container {
+          height: calc(100% - 20px); /* Adjust height to leave room for tabs */
+          overflow-y: auto;
+          border: 1px solid green ;
+        }
 }
 
 /** IMAGE STYLING - ABOVE **/
