@@ -61,6 +61,7 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
   };
 
   const handleExitFullScreen = () => {
+    console.log("Exiting full screen"); // Debug log
     setIsFullscreen(false);
     document.body.style.overflow = 'auto'; // Restore scrolling
   };
@@ -68,6 +69,7 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
   useEffect(() => {
     const fetchMedia = async () => {
       if (isOpen && currentMarker) {
+        console.log("Fetching media for marker:", currentMarker); // Debug log
         const media = await loadMedia(currentMarker, tripID);
         setFormattedMedia(media);
       }
@@ -78,6 +80,7 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
   useEffect(() => {
     if (isOpen) {
       const loadVoices = () => {
+        console.log("Loading available voices"); // Debug log
         const voices = window.speechSynthesis.getVoices();
         if (voices.length > 0) {
           setAvailableVoices(voices);
@@ -91,24 +94,30 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
 
   useEffect(() => {
     if (!isOpen) {
-      setFormattedMedia([]); // Clear media state
-      setTabIndex(0); // Reset tabs to the default
+      console.log("Popup closed, resetting states"); // Debug log
+      setFormattedMedia([]);
+      setTabIndex(0);
+    } else {
+      console.log("Popup opened"); // Debug log
     }
   }, [isOpen]);
 
-  // Force re-render on exit full-screen mode
   useEffect(() => {
+    console.log("isFullscreen changed:", isFullscreen); // Debug log
     if (!isFullscreen) {
-      // Trigger layout update
       const container = document.querySelector('.popup--modal-content');
       if (container) {
-        container.style.transform = 'scale(1)'; // Reset scale (for Safari quirks)
+        console.log("Repainting layout for container"); // Debug log
+        container.style.transform = 'scale(1)'; // Reset scale
         container.offsetHeight; // Force reflow
+      } else {
+        console.log("Container not found"); // Debug log
       }
     }
   }, [isFullscreen]);
 
   const handleRequestClose = () => {
+    console.log("Closing MapPopup"); // Debug log
     setTabIndex(0);
     onRequestClose();
   };
@@ -187,7 +196,10 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
                   additionalClass="image--custom-image-gallery"
                   renderItem={renderMediaItem}
                   useBrowserFullscreen={!isMobile} // Disable browser fullscreen for mobile
-                  onScreenChange={(isFullscreen) => setIsFullscreen(isFullscreen)}
+                  onScreenChange={(isFullscreen) => {
+                    console.log("onScreenChange triggered:", isFullscreen); // Debug log
+                    setIsFullscreen(isFullscreen);
+                  }}
                 />
                 {isMobile && isFullscreen && (
                   <button className="exit-fullscreen-button" onClick={handleExitFullScreen}>
