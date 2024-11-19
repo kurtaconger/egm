@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Mark } from '@tiptap/core';
-import { db } from '../utils/firebase';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
+
+import { db } from '../utils/firebase';
+
 import './mapPopup.css'
 
 const colors = {

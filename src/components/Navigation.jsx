@@ -1,106 +1,113 @@
-import { useState } from 'react';
-import './navigation.css';
+import { useState, useEffect } from 'react';
+import { collection, getDocs } from 'firebase/firestore';
+
 import ManagePictures from './ManagePictures';
-import ManageNonGPSPictures from './ManageNonGPSPictures'; // Import new component
-import Configure from './Configure';
-import AddStops from './AddStops';
-import AddUser from './AddUser';
-import Account from './Account';
-import LoginIcon from '@mui/icons-material/Login';
+import ManageNonGPSPictures from './ManageNonGPSPictures';
+import Setup from './Setup';
+
+import { db } from '../utils/firebase';
+
 import CloseIcon from '@mui/icons-material/Close';
 import MenuIcon from '@mui/icons-material/Menu';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import LoupeIcon from '@mui/icons-material/Loupe';
-import { Avatar } from '@mui/material';
-import { getAuth, signOut } from 'firebase/auth';
 
-function Navigation({
-  tripTitle,
-  toggleMapPopups,
-  rotateMap,
-  tripID,
-  mapboxAccessToken,
-  onLogin
-}) {
+import './navigation.css';
+
+
+function Navigation({tripTitle, toggleMapPopups, rotateMap, tripID, mapboxAccessToken }) {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isPictureModalOpen, setIsPictureModalOpen] = useState(false);
-  const [isNonGPSModalOpen, setIsNonGPSModalOpen] = useState(false); // New state for non-GPS modal
-  const [isConfigureModalOpen, setIsConfigureModalOpen] = useState(false);
-  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
-  const [isAddStopsModalOpen, setIsAddStopsModalOpen] = useState(false);
-  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [isNonGPSModalOpen, setIsNonGPSModalOpen] = useState(false);
+  const [isSetupModalOPen, setIsSetupModalOpen] = useState(false)
+
   const [user, setUser] = useState(null);
+  const [hasLocations, setHasLocations] = useState(false); // Track if locations exist
+
+  // Check if the "MAP-tripID-DATA" collection exists
+  useEffect(() => {
+    const checkLocations = async () => {
+      if (!tripID) return;
+      try {
+        const locationCollectionRef = collection(db, `MAP-${tripID}-DATA`);
+        const locationSnapshot = await getDocs(locationCollectionRef);
+        setHasLocations(!locationSnapshot.empty); // Set to true if documents exist
+      } catch (error) {
+        console.error("Error checking locations:", error);
+      }
+    };
+
+    checkLocations();
+  }, [tripID]);
 
   const toggleNav = () => setIsNavOpen(!isNavOpen);
+
   const handlePictureButtonClick = () => { setIsPictureModalOpen(true); setIsNavOpen(false); };
-  const handleNonGPSPButtonClick = () => { setIsNonGPSModalOpen(true); setIsNavOpen(false); }; // Open non-GPS modal
-  const handleConfigureButtonClick = () => { setIsConfigureModalOpen(true); setIsNavOpen(false); };
-  const handleAddStopsButtonClick = () => { setIsAddStopsModalOpen(true); setIsNavOpen(false); };
-  const handleUserButtonClick = () => { setIsUserModalOpen(true); setIsNavOpen(false); };
-  const handleAccountButtonClick = () => setIsAccountModalOpen(true);
+  const handleNonGPSPButtonClick = () => { setIsNonGPSModalOpen(true); setIsNavOpen(false); }; 
+  const handleSetupButtonClick = () => {setIsSetupModalOpen(true); setIsNavOpen(false); };
 
-  const closeConfigureModal = () => { setIsConfigureModalOpen(false); };
-  const closeAddStopModal = () => { setIsAddStopsModalOpen(false); };
-  const closeAccountModal = () => setIsAccountModalOpen(false);
-  const closeUserModal = () => setIsUserModalOpen(false);
+  const closeSetupModal = () => setIsSetupModalOpen(false);
   const closeNonGPSModal = () => setIsNonGPSModalOpen(false); // Close non-GPS modal
-
-  const handleLogin = (userInfo) => {
-    setUser(userInfo);
-    onLogin(userInfo);
-    closeAccountModal();
-  };
-
-  const handleLogout = () => {
-    const auth = getAuth();
-    signOut(auth).then(() => {
-      setUser(null);
-    }).catch((error) => {
-      console.error("Logout failed:", error);
-    });
-  };
 
   return (
     <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 400 }}>
-      <div className='nav--map-top-row'>
-        <div className='nav--map-title-container'>
-          <div className='nav--map-top-menu'>
+      <div className="nav--map-top-row">
+        <div className="nav--map-title-container">
+          <div className="nav--map-top-menu">
             {isNavOpen ? (
-              <CloseIcon className="material-icons" style={{ fontSize: '32px', cursor: 'pointer' }} onClick={toggleNav} />
+              <CloseIcon
+                className="material-icons"
+                style={{ fontSize: '32px', cursor: 'pointer' }}
+                onClick={toggleNav}
+              />
             ) : (
-              <MenuIcon className="material-icons" style={{ fontSize: '32px', cursor: 'pointer' }} onClick={toggleNav} />
+              <MenuIcon
+                className="material-icons"
+                style={{ fontSize: '32px', cursor: 'pointer' }}
+                onClick={toggleNav}
+              />
             )}
           </div>
-          <div className='nav--map-title'>{tripTitle}</div>
+          <div className="nav--map-title">{tripTitle}</div>
         </div>
-        <div className='nav--map-top-buttons'>
-          <AutorenewIcon className="material-icons rotate-icon" style={{ fontSize: '32px', cursor: 'pointer', marginRight: '10px', verticalAlign: 'middle' }} onClick={rotateMap} />
-          <LoupeIcon className="material-icons" style={{ fontSize: '32px', cursor: 'pointer', marginRight: '10px', verticalAlign: 'middle' }} onClick={toggleMapPopups} />
-          {user ? (
-            <Avatar
-              src={user.photoURL || ''}
-              alt={user.displayName || ''}
-              style={{ cursor: 'pointer', width: '32px', height: '32px', marginRight: '10px', display: 'inline-flex', verticalAlign: 'middle' }}
-              onClick={handleLogout}
-            >
-              {!user.photoURL && user.displayName ? user.displayName[0] : null}
-            </Avatar>
-          ) : (
-            <LoginIcon className="material-icons" style={{ fontSize: '32px', cursor: 'pointer', marginRight: '10px', verticalAlign: 'middle' }} onClick={handleAccountButtonClick} />
-          )}
+        <div className="nav--map-top-buttons">
+          <AutorenewIcon
+            className="material-icons rotate-icon"
+            style={{
+              fontSize: '32px',
+              cursor: 'pointer',
+              marginRight: '10px',
+              verticalAlign: 'middle',
+            }}
+            onClick={rotateMap}
+          />
+          <LoupeIcon
+            className="material-icons"
+            style={{
+              fontSize: '32px',
+              cursor: 'pointer',
+              marginRight: '10px',
+              verticalAlign: 'middle',
+            }}
+            onClick={toggleMapPopups}
+          />
         </div>
       </div>
 
       {isNavOpen && (
-        <div className='nav--outer-container'>
+        <div className="nav--outer-container">
           <div className="nav--button-container">
-            <button className='nav--button' onClick={handlePictureButtonClick}>Upload Pictures</button>
-            <button className='nav--button' onClick={handleNonGPSPButtonClick}>Upload Pictures without GPS</button>
+            <button className="nav--button" onClick={handlePictureButtonClick}>
+              Upload Pictures
+            </button>
+            <button className="nav--button" onClick={handleNonGPSPButtonClick}>
+              Upload Pictures without GPS
+            </button>
             <hr />
-            <button className='nav--button' onClick={handleConfigureButtonClick}>Add Title</button>
-            <button className='nav--button' onClick={handleAddStopsButtonClick}>Add Stops</button>
-            <button className='nav--button' onClick={handleUserButtonClick}>Add Users</button>
-            <button className='nav--button'>Select Trips</button>
+            <button className="nav--button" onClick={handleSetupButtonClick}>
+              Setup
+            </button>
+            <button className="nav--button">Select Trips</button>
           </div>
         </div>
       )}
@@ -114,44 +121,17 @@ function Navigation({
       )}
 
       {isNonGPSModalOpen && (
-        <ManageNonGPSPictures
-          onCancel={closeNonGPSModal}
-          tripID={tripID}
-        />
+        <ManageNonGPSPictures onCancel={closeNonGPSModal} tripID={tripID} />
       )}
 
-      {isConfigureModalOpen && (
-        <Configure
-          isConfigureModalOpen={isConfigureModalOpen}
-          tripID={tripID}
-          onClose={closeConfigureModal}
-        />
-      )}
-
-      {isAddStopsModalOpen && (
-        <AddStops
-          onClose={closeAddStopModal}
-          tripID={tripID}
-          mapboxAccessToken={mapboxAccessToken}
-        />
-      )}
-
-      {isUserModalOpen && (
-        <AddUser
-          onClose={closeUserModal}
-          tripID={tripID}
-        />
-      )}
-
-      {isAccountModalOpen && (
-        <Account 
-          onLogin={handleLogin} 
-          onClose={closeAccountModal} 
-          tripID={tripID}
-        />
-      )}
+      {isSetupModalOPen && (
+        <Setup
+        onClose={closeSetupModal}
+        mapboxAccessToken={mapboxAccessToken } />
+        )}
     </div>
   );
 }
 
 export default Navigation;
+

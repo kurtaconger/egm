@@ -1,19 +1,22 @@
 import { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Tabs, Tab, Box, Typography } from '@mui/material';
+import ImageGallery from 'react-image-gallery';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import AssistantIcon from '@mui/icons-material/Assistant';
 import EditIcon from '@mui/icons-material/Edit';
 import KeyboardVoiceIcon from '@mui/icons-material/KeyboardVoice';
 import 'react-image-gallery/styles/css/image-gallery.css';
-import './mapPopup.css';
-import loadMedia from '../utils/loadMedia';
 
-import ImageGallery from 'react-image-gallery';
-import ManageComments from './ManageComments';
 import AIGenComments from './AIGenComments';
+import ManageComments from './ManageComments';
 import CommentsSummery from './CommentsSummery';
+
+import loadMedia from '../utils/loadMedia';
+  
+import './mapPopup.css';
+
 
 const TabPanel = ({ children, value, index, ...other }) => (
   <div

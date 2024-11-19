@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import './processNonGPS.css';
 import { collection, getDocs, updateDoc, doc,arrayUnion } from 'firebase/firestore';
 import { ref, uploadBytes } from 'firebase/storage';
+
 import { db, storage } from '../utils/firebase';
+import './processNonGPS.css';
 
 function ManageNonGPSPictures({ onCancel, tripID }) {
     const [nonGPSFiles, setNonGPSFiles] = useState([]);

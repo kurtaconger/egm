@@ -1,4 +1,3 @@
-// App.jsx
 import React, { useEffect, useState } from 'react';
 import { getDoc, doc } from 'firebase/firestore';
 import { useLocation } from 'react-router-dom';
@@ -6,6 +5,7 @@ import './index.css';
 import Navigation from './components/Navigation';
 import MapPopup from './components/MapPopup';
 import Map from './components/Map';
+import Login from './components/Login'; // Import Login Component
 import { loadLocations } from './utils/loadLocations';
 import { db } from './utils/firebase';
 
@@ -16,23 +16,27 @@ const App = () => {
   const [showPopups, setShowPopups] = useState(true);
   const [mapBearing, setMapBearing] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [tripTitle, setTripTitle] = useState("Title at Initialization");
+  const [tripTitle, setTripTitle] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentLocation, setCurrentLocation] = useState(null);
-  const [user, setUser] = useState(null); // New state for logged-in user
- 
+  const [user, setUser] = useState(null); // State for logged-in user
+  const [tripID, setTripID] = useState(null); // Explicit tripID state
+
   const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const tripID = queryParams.get("ID");
-  const tripNameApp = `MAP-${tripID}-APP`;
 
-  const sanitizeId = (id) => {
-    return id.replace(/\s+/g, '-').replace(/[^\w-]/g, '');
-  };
+  const sanitizeId = (id) => id.replace(/\s+/g, '-').replace(/[^\w-]/g, '');
 
-  const loadTitle = async () => {
-    setIsLoading(true);
+  const loadTripData = async () => {
     try {
+      setIsLoading(true);
+      const queryParams = new URLSearchParams(location.search);
+      const tripIDParam = queryParams.get('ID');
+      if (!tripIDParam) throw new Error('Trip ID is missing in URL.');
+      setTripID(tripIDParam);
+
+      const tripNameApp = `MAP-${tripIDParam}-APP`;
+
+      // Fetch Trip Title
       const tripTitleDocRef = doc(db, tripNameApp, 'config');
       const tripTitleSnapshot = await getDoc(tripTitleDocRef);
       if (tripTitleSnapshot.exists()) {
@@ -41,12 +45,20 @@ const App = () => {
       } else {
         throw new Error('No map title found at the specified path');
       }
+
+      // Load Locations
+      const locationsData = await loadLocations(tripIDParam);
+      setLocations(locationsData);
     } catch (error) {
-      console.error('Error fetching map title from Firebase:', error);
+      console.error('Error loading trip data:', error);
     } finally {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadTripData();
+  }, [location.search]);
 
   const toggleMapPopups = () => {
     setShowPopups(!showPopups);
@@ -57,21 +69,9 @@ const App = () => {
     setMapBearing(newBearing);
   };
 
-  const loadLocationsData = async () => {
-    setIsLoading(true);
-    const locationsData = await loadLocations(tripID);
-    setLocations(locationsData);
-    setIsLoading(false);
-  };
-
-  useEffect(() => {
-    loadLocationsData();
-    loadTitle();
-  }, [tripID]);
-
   const handlePopupClick = async (markerId) => {
     try {
-      const markerRef = doc(db, 'MAP-' + tripID + '-DATA', markerId);
+      const markerRef = doc(db, `MAP-${tripID}-DATA`, markerId);
       const markerSnapshot = await getDoc(markerRef);
 
       if (markerSnapshot.exists()) {
@@ -85,10 +85,6 @@ const App = () => {
     }
   };
 
-  const hasComments = (location) => {
-    return location && location.content && location.content.trim() !== '';
-  };
-
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
@@ -96,7 +92,8 @@ const App = () => {
   const handleRequestNext = () => {
     if (currentLocation) {
       const currentLocNumber = currentLocation.seq;
-      const nextLocation = locations.find((location) => location.seq === currentLocNumber + 1) || locations[0];
+      const nextLocation =
+        locations.find((loc) => loc.seq === currentLocNumber + 1) || locations[0];
       setCurrentLocation(nextLocation);
       setIsModalOpen(true);
     }
@@ -105,7 +102,9 @@ const App = () => {
   const handleRequestPrev = () => {
     if (currentLocation) {
       const currentLocNumber = currentLocation.seq;
-      const prevLocation = locations.find((location) => location.seq === currentLocNumber - 1) || locations[locations.length - 1];
+      const prevLocation =
+        locations.find((loc) => loc.seq === currentLocNumber - 1) ||
+        locations[locations.length - 1];
       setCurrentLocation(prevLocation);
       setIsModalOpen(true);
     }
@@ -113,15 +112,37 @@ const App = () => {
 
   const handleLogin = (user) => {
     setUser(user);
-    console.log("User logged in:", user);
+    console.log('User logged in:', user);
   };
+
+  // Wait for tripID and tripTitle to load before showing Login or app content
+  if (isLoading) {
+    return (
+      <div style={{ padding: '20px', textAlign: 'center' }}>
+        <h2>Loading...</h2>
+      </div>
+    );
+  }
+
+  // Display Login Component if user is not logged in
+  if (!user) {
+    
+    return (
+      <Login
+        onLogin={handleLogin}
+        onClose={() => console.log('Login closed')}
+        tripID={tripID}
+        tripTitle={tripTitle}
+      />
+    );
+  }
 
   return (
     <div>
       {locations.length === 0 && !isLoading ? (
         <div style={{ padding: '20px', textAlign: 'center' }}>
-          <h2>No valid database name exists</h2>
-          <p>Use Navigation/Admin/Create Collection to establish a connection.</p>
+          <h2>A trip has not been created yet</h2>
+          <p>Select Navigation / Add Title to begin.</p>
         </div>
       ) : null}
 

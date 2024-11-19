@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import { updateDoc, doc, arrayUnion } from 'firebase/firestore';
+import { ref, uploadBytes } from 'firebase/storage';
 import PropTypes from 'prop-types';
 import heic2any from 'heic2any';
+
 import { handleRetrieveGPS } from '../utils/retrieveGPS';
 import { findClosestLocation } from '../utils/findClosestLocation';
-import { ref, uploadBytes } from 'firebase/storage';
 import { db, storage } from '../utils/firebase';
-import { updateDoc, doc, arrayUnion } from 'firebase/firestore';
 import './managePictures.css';
 
 // Function to add a timestamp to console.log messages

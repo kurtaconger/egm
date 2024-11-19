@@ -1,14 +1,16 @@
 import { useEffect, useState, useRef } from 'react';
+import PropTypes from 'prop-types';
 import { useSpeechSynthesis } from 'react-speech-kit';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { db } from '../utils/firebase';
-import PropTypes from 'prop-types';
-import './mapPopup.css';
-
 import MoreTimeIcon from '@mui/icons-material/MoreTime';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import RestoreIcon from '@mui/icons-material/Restore';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+
+import { db } from '../utils/firebase';
+
+import './mapPopup.css';
+
 
 const AIGenComments = ({ currentMarker, tripID, user }) => {
     // State variables
