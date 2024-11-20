@@ -14,9 +14,8 @@ import ManageComments from './ManageComments';
 import CommentsSummery from './CommentsSummery';
 
 import loadMedia from '../utils/loadMedia';
-  
-import './mapPopup.css';
 
+import './mapPopup.css';
 
 const TabPanel = ({ children, value, index, ...other }) => (
   <div
@@ -54,7 +53,7 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
       { icon: <PhotoCameraIcon />, label: <span>Photos/<br />Videos</span> },
       { icon: <KeyboardVoiceIcon />, label: <span>AI<br />Interview</span> },
       { icon: <EditIcon />, label: <span>Edit<br />Comments</span> },
-      { icon: <AssistantIcon />, label: <span>Comments<br />Summery</span> },
+      { icon: <AssistantIcon />, label: <span>Comments<br />Summary</span> },
     ],
     []
   );
@@ -64,17 +63,23 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
   };
 
   const handleExitFullScreen = () => {
-    console.log("Exiting full screen"); // Debug log
+    console.log("Exiting full screen");
     setIsFullscreen(false);
-    document.body.style.overflow = 'auto'; // Restore scrolling
+    document.body.style.overflow = 'auto';
   };
 
   useEffect(() => {
     const fetchMedia = async () => {
       if (isOpen && currentMarker) {
-        console.log("Fetching media for marker:", currentMarker); // Debug log
+        console.log("Fetching media for marker:", currentMarker);
         const media = await loadMedia(currentMarker, tripID);
-        setFormattedMedia(media);
+        const formatted = media.map((item) => ({
+          original: item.original,
+          thumbnail: item.thumbnail || item.original,
+          isVideo: item.isVideo,
+        }));
+        console.log('[DEBUG] Formatted Media:', formatted);
+        setFormattedMedia(formatted);
       }
     };
     fetchMedia();
@@ -83,7 +88,7 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
   useEffect(() => {
     if (isOpen) {
       const loadVoices = () => {
-        console.log("Loading available voices"); // Debug log
+        console.log("Loading available voices");
         const voices = window.speechSynthesis.getVoices();
         if (voices.length > 0) {
           setAvailableVoices(voices);
@@ -97,30 +102,30 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
 
   useEffect(() => {
     if (!isOpen) {
-      console.log("Popup closed, resetting states"); // Debug log
+      console.log("Popup closed, resetting states");
       setFormattedMedia([]);
       setTabIndex(0);
     } else {
-      console.log("Popup opened"); // Debug log
+      console.log("Popup opened");
     }
   }, [isOpen]);
 
   useEffect(() => {
-    console.log("isFullscreen changed:", isFullscreen); // Debug log
+    console.log("isFullscreen changed:", isFullscreen);
     if (!isFullscreen) {
       const container = document.querySelector('.popup--modal-content');
       if (container) {
-        console.log("Repainting layout for container"); // Debug log
-        container.style.transform = 'scale(1)'; // Reset scale
-        container.offsetHeight; // Force reflow
+        console.log("Repainting layout for container");
+        container.style.transform = 'scale(1)';
+        container.offsetHeight;
       } else {
-        console.log("Container not found"); // Debug log
+        console.log("Container not found");
       }
     }
   }, [isFullscreen]);
 
   const handleRequestClose = () => {
-    console.log("Closing MapPopup"); // Debug log
+    console.log("Closing MapPopup");
     setTabIndex(0);
     onRequestClose();
   };
@@ -198,17 +203,9 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
                   showPlayButton={false}
                   additionalClass="image--custom-image-gallery"
                   renderItem={renderMediaItem}
-                  useBrowserFullscreen={!isMobile} // Disable browser fullscreen for mobile
-                  onScreenChange={(isFullscreen) => {
-                    console.log("onScreenChange triggered:", isFullscreen); // Debug log
-                    setIsFullscreen(isFullscreen);
-                  }}
+                  useBrowserFullscreen={!isMobile}
+                  onScreenChange={(isFullscreen) => setIsFullscreen(isFullscreen)}
                 />
-                {isMobile && isFullscreen && (
-                  <button className="exit-fullscreen-button" onClick={handleExitFullScreen}>
-                    Exit Full Screen
-                  </button>
-                )}
               </TabPanel>
             )}
             {tabIndex === 1 && (
@@ -251,3 +248,4 @@ MapPopup.propTypes = {
 };
 
 export default MapPopup;
+

@@ -3,29 +3,35 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from './firebase'; // Adjust this path if necessary
 
 /**
- * Fetches images from Firebase Storage based on a list of file paths.
- * @param {Array<string>} imagePaths - An array of image paths.
- * @returns {Promise<Array>} An array of image URLs in the format required by ImageGallery.
+ * Fetches media from Firebase Storage based on a list of file paths.
+ * Differentiates between images and videos for proper formatting.
+ * @param {Array<string>} mediaPaths - An array of media paths.
+ * @returns {Promise<Array>} An array of formatted media objects.
  */
-export const fetchImagesFromFirebase = async (imagePaths) => {
+export const fetchMediaFromFirebase = async (mediaPaths) => {
   const storage = getStorage();
 
   try {
-    const imageUrls = await Promise.all(
-      imagePaths.map(async (path) => {
+    const mediaItems = await Promise.all(
+      mediaPaths.map(async (path) => {
         const finalPath = path.includes('uploaded_media') ? path : `uploaded_media/${path}`;
         const storageRef = ref(storage, finalPath);
         const url = await getDownloadURL(storageRef);
-        return url;
+
+        // Determine if the file is a video based on the file extension
+        const isVideo = finalPath.endsWith('.mp4');
+
+        return {
+          original: url,
+          thumbnail: isVideo ? undefined : url, // Videos typically don't need thumbnails
+          isVideo, // Set the isVideo flag
+        };
       })
     );
 
-    return imageUrls.map((url) => ({
-      original: url,
-      thumbnail: url,
-    }));
+    return mediaItems;
   } catch (error) {
-    console.error('Error fetching images from Firebase:', error);
+    console.error('Error fetching media from Firebase:', error);
     throw error;
   }
 };
@@ -65,7 +71,7 @@ const loadMedia = async (currentMarker, tripID) => {
     const mediaPaths = markerData.media; // Array of media paths from the `media` field
     console.log(`[DEBUG] Extracted media paths:`, mediaPaths);
 
-    const mediaItems = await fetchImagesFromFirebase(mediaPaths);
+    const mediaItems = await fetchMediaFromFirebase(mediaPaths);
     console.log(`[DEBUG] Successfully loaded media items:`, mediaItems);
 
     return mediaItems;
@@ -76,5 +82,6 @@ const loadMedia = async (currentMarker, tripID) => {
 };
 
 export default loadMedia;
+
 
 
