@@ -3,7 +3,7 @@ import { collection, getDocs, updateDoc, doc,arrayUnion } from 'firebase/firesto
 import { ref, uploadBytes } from 'firebase/storage';
 
 import { db, storage } from '../utils/firebase';
-import './processNonGPS.css';
+import './manageNonGPSPictures.css'
 
 function ManageNonGPSPictures({ onCancel, tripID }) {
     const [nonGPSFiles, setNonGPSFiles] = useState([]);
@@ -113,14 +113,14 @@ function ManageNonGPSPictures({ onCancel, tripID }) {
     };
 
     return (
-        <div className="ass-loc--overlay">
-            <div className="ass-loc--content">
-                <div className="ass-loc--header">
-                    <h3>Upload Files without GPS</h3>
-                    <button className="ass-loc--close-button" onClick={onCancel}>X</button>
+        <div className="non-gps--overlay">
+            <div className="non-gps--content">
+                <div className="non-gps--header">
+                    <h3 className='non-gps--title'> Upload Files without GPS</h3>
+                    <button className="non-gps--close-button" onClick={onCancel}>X</button>
                 </div>
-                <div className="ass-loc--body">
-                    <button className="ass-loc--button" onClick={() => fileInputRef.current.click()}>
+                <div className="non-gps--body">
+                    <button className="non-gps--button" onClick={() => fileInputRef.current.click()}>
                         Select Files
                     </button>
                     <input
@@ -131,21 +131,21 @@ function ManageNonGPSPictures({ onCancel, tripID }) {
                         style={{ display: 'none' }}
                         onChange={handleSelectFiles}
                     />
-                    <div>
+                    <div className='non-gps--file-text'>
                         {successMessage || `File: ${currentFile ? currentFile.name : 'No file selected'}`}
                     </div>
-                    <div className="ass-loc--media-container">
+                    <div className="non-gps--media-container">
                         {currentFile && currentFile.name.toLowerCase().endsWith('.jpg') && (
-                            <img src={URL.createObjectURL(currentFile)} alt="Selected" className="ass-loc--image" />
+                            <img src={URL.createObjectURL(currentFile)} alt="Selected" className="non-gps--image" />
                         )}
                         {currentFile && currentFile.name.toLowerCase().endsWith('.mp4') && (
-                            <video controls className="ass-loc--video">
+                            <video controls className="non-gps--video">
                                 <source src={URL.createObjectURL(currentFile)} type="video/mp4" />
                                 Your browser does not support the video tag.
                             </video>
                         )}
                     </div>
-                    <label htmlFor="locationSelect">Choose Location:</label>
+                    <label htmlFor="locationSelect" className='non-gps--label'>Choose Location:</label>
                     <select
                         id="locationSelect"
                         value={selectedLocation}
@@ -156,10 +156,12 @@ function ManageNonGPSPictures({ onCancel, tripID }) {
                             <option key={index} value={loc.shortName}>{loc.shortName}</option>
                         ))}
                     </select>
-                    <button className="ass-loc--button" onClick={handleSubmit} disabled={isLoading}>
-                        {isLoading ? 'Uploading...' : 'Submit'}
-                    </button>
-                    <button className="ass-loc--button" onClick={onCancel}>Cancel</button>
+                    <div className='non-gps--button-container'>
+                        <button className="non-gps--button" onClick={handleSubmit} disabled={isLoading}>
+                            {isLoading ? 'Uploading...' : 'Submit'}
+                        </button>
+                        <button className="non-gps--button" onClick={onCancel}>Cancel</button>
+                    </div>
                 </div>
             </div>
         </div>

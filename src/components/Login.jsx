@@ -129,7 +129,7 @@ const Login = ({ onLogin, onClose, tripID, tripTitle }) => {
             <img
               src="https://upload.wikimedia.org/wikipedia/commons/4/4a/Logo_2013_Google.png"
               alt="Google Icon"
-              style={{ width: '20px', marginRight: '8px' }}
+              style={{ width: '30px', marginRight: '8px' }}
             />
             Continue with Google
           </button>

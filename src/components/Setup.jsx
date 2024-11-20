@@ -229,7 +229,7 @@ const Setup = ({ onClose, mapboxAccessToken }) => {
           </button>
         </div>
         <div className="config--body">
-          <div className="config--container config--red-container">
+          <div className="config--container">
             <label className="config--label">Title</label>
             <input
               type="text"
@@ -249,22 +249,22 @@ const Setup = ({ onClose, mapboxAccessToken }) => {
           {displayMessageForTitleAndSpots && <p className="config--message">{displayMessageForTitleAndSpots}</p>}
             <div className="config--button-container">
               <button
-                className="config--button"
+                className="modal--button"
                 disabled={loading}
                 onClick={handleValidateGPS}
               >
                 Validate Spots
               </button>
               <button
-                className="config--button"
+                className="modal--button"
                 disabled={loading}
                 onClick={handleSaveTitleAndSpots}
               >
-                Save Title and Spots
+                Save Title & Spots
               </button>
             </div>
           </div>
-          <div className="config--container config--green-container">
+          <div className="config--container">
             <label className="config--label">Travel Group Members</label>
             <textarea
               value={fullAccessEmails}
@@ -284,14 +284,14 @@ const Setup = ({ onClose, mapboxAccessToken }) => {
             {displayMessageForUsers && <p className="config--message">{displayMessageForUsers}</p>}
             <div className="config--button-container">
               <button
-                className="config--button"
+                className="modal--button"
                 onClick={checkValidEmail}
                 disabled={loading}
               >
                 Validate Emails
               </button>
               <button
-                className="config--button"
+                className="modal--button"
                 disabled={loading}
                 onClick={handleSaveUsers}
               >
