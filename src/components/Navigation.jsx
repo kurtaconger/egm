@@ -11,15 +11,15 @@ import CloseIcon from '@mui/icons-material/Close';
 import MenuIcon from '@mui/icons-material/Menu';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import LoupeIcon from '@mui/icons-material/Loupe';
+import IosShareIcon from '@mui/icons-material/IosShare';
 
 import './navigation.css';
 
-
-function Navigation({tripTitle, toggleMapPopups, rotateMap, tripID, mapboxAccessToken }) {
+function Navigation({ tripTitle, toggleMapPopups, rotateMap, tripID, mapboxAccessToken }) {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isPictureModalOpen, setIsPictureModalOpen] = useState(false);
   const [isNonGPSModalOpen, setIsNonGPSModalOpen] = useState(false);
-  const [isSetupModalOPen, setIsSetupModalOpen] = useState(false)
+  const [isSetupModalOpen, setIsSetupModalOpen] = useState(false);
 
   const [user, setUser] = useState(null);
   const [hasLocations, setHasLocations] = useState(false); // Track if locations exist
@@ -42,12 +42,42 @@ function Navigation({tripTitle, toggleMapPopups, rotateMap, tripID, mapboxAccess
 
   const toggleNav = () => setIsNavOpen(!isNavOpen);
 
-  const handlePictureButtonClick = () => { setIsPictureModalOpen(true); setIsNavOpen(false); };
-  const handleNonGPSPButtonClick = () => { setIsNonGPSModalOpen(true); setIsNavOpen(false); }; 
-  const handleSetupButtonClick = () => {setIsSetupModalOpen(true); setIsNavOpen(false); };
+  const handlePictureButtonClick = () => {
+    setIsPictureModalOpen(true);
+    setIsNavOpen(false);
+  };
+  const handleNonGPSPButtonClick = () => {
+    setIsNonGPSModalOpen(true);
+    setIsNavOpen(false);
+  };
+  const handleSetupButtonClick = () => {
+    setIsSetupModalOpen(true);
+    setIsNavOpen(false);
+  };
 
   const closeSetupModal = () => setIsSetupModalOpen(false);
   const closeNonGPSModal = () => setIsNonGPSModalOpen(false); // Close non-GPS modal
+
+  const handleShareButtonClick = () => {
+    const subject = encodeURIComponent(tripTitle);
+    const body = encodeURIComponent(`Check out this trip: ${window.location.href}`);
+    const isIPhone = /iPhone/.test(navigator.userAgent);
+
+    if (isIPhone) {
+      // Provide a choice for iPhone users
+      const useSMS = window.confirm("Do you want to share via SMS? Click Cancel to use Email.");
+      if (useSMS) {
+        // Open SMS app
+        window.location.href = `sms:?body=Check out this trip: ${window.location.href}`;
+      } else {
+        // Open Email app
+        window.location.href = `mailto:?subject=${subject}&body=${body}`;
+      }
+    } else {
+      // Default to email for other devices
+      window.location.href = `mailto:?subject=${subject}&body=${body}`;
+    }
+  };
 
   return (
     <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 400 }}>
@@ -91,6 +121,16 @@ function Navigation({tripTitle, toggleMapPopups, rotateMap, tripID, mapboxAccess
             }}
             onClick={toggleMapPopups}
           />
+          <IosShareIcon
+            className="material-icons"
+            style={{
+              fontSize: '32px',
+              cursor: 'pointer',
+              marginRight: '10px',
+              verticalAlign: 'middle',
+            }}
+            onClick={handleShareButtonClick}
+          />
         </div>
       </div>
 
@@ -124,14 +164,11 @@ function Navigation({tripTitle, toggleMapPopups, rotateMap, tripID, mapboxAccess
         <ManageNonGPSPictures onCancel={closeNonGPSModal} tripID={tripID} />
       )}
 
-      {isSetupModalOPen && (
-        <Setup
-        onClose={closeSetupModal}
-        mapboxAccessToken={mapboxAccessToken } />
-        )}
+      {isSetupModalOpen && (
+        <Setup onClose={closeSetupModal} mapboxAccessToken={mapboxAccessToken} />
+      )}
     </div>
   );
 }
 
 export default Navigation;
-

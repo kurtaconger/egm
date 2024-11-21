@@ -6,6 +6,8 @@ import '../index.css';
 import { drawLinesBetweenLocations } from '../utils/lineDrawing';
 import { getFirstPictureUrl } from '../utils/getFirstPictureUrl';
 
+
+
 const Map = ({
   mapBoxToken,
   locations,

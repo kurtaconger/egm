@@ -1,13 +1,17 @@
 import { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Tabs, Tab, Box, Typography } from '@mui/material';
-import ImageGallery from 'react-image-gallery';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import AssistantIcon from '@mui/icons-material/Assistant';
 import EditIcon from '@mui/icons-material/Edit';
 import KeyboardVoiceIcon from '@mui/icons-material/KeyboardVoice';
-import 'react-image-gallery/styles/css/image-gallery.css';
+import LightGallery from 'lightgallery/react';
+import 'lightgallery/css/lightgallery.css';
+import 'lightgallery/css/lg-fullscreen.css';
+import 'lightgallery/css/lg-video.css';
+import lgFullscreen from 'lightgallery/plugins/fullscreen';
+import lgVideo from 'lightgallery/plugins/video';
 
 import AIGenComments from './AIGenComments';
 import ManageComments from './ManageComments';
@@ -16,6 +20,9 @@ import CommentsSummery from './CommentsSummery';
 import loadMedia from '../utils/loadMedia';
 
 import './mapPopup.css';
+
+const lightGalleryLic = import.meta.env.VITE_LIGHT_GALLERY_LIC;
+
 
 const TabPanel = ({ children, value, index, ...other }) => (
   <div
@@ -63,7 +70,6 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
   };
 
   const handleExitFullScreen = () => {
-    console.log("Exiting full screen");
     setIsFullscreen(false);
     document.body.style.overflow = 'auto';
   };
@@ -71,14 +77,15 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
   useEffect(() => {
     const fetchMedia = async () => {
       if (isOpen && currentMarker) {
-        console.log("Fetching media for marker:", currentMarker);
         const media = await loadMedia(currentMarker, tripID);
         const formatted = media.map((item) => ({
-          original: item.original,
-          thumbnail: item.thumbnail || item.original,
-          isVideo: item.isVideo,
+          src: item.original,
+          thumb: item.thumbnail || item.original,
+          poster: item.isVideo ? item.original : undefined,
+          html: item.isVideo
+            ? `<video controls><source src="${item.original}" type="video/mp4"></video>`
+            : undefined,
         }));
-        console.log('[DEBUG] Formatted Media:', formatted);
         setFormattedMedia(formatted);
       }
     };
@@ -88,7 +95,6 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
   useEffect(() => {
     if (isOpen) {
       const loadVoices = () => {
-        console.log("Loading available voices");
         const voices = window.speechSynthesis.getVoices();
         if (voices.length > 0) {
           setAvailableVoices(voices);
@@ -102,56 +108,24 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
 
   useEffect(() => {
     if (!isOpen) {
-      console.log("Popup closed, resetting states");
       setFormattedMedia([]);
       setTabIndex(0);
-    } else {
-      console.log("Popup opened");
     }
   }, [isOpen]);
 
   useEffect(() => {
-    console.log("isFullscreen changed:", isFullscreen);
     if (!isFullscreen) {
       const container = document.querySelector('.popup--modal-content');
       if (container) {
-        console.log("Repainting layout for container");
         container.style.transform = 'scale(1)';
         container.offsetHeight;
-      } else {
-        console.log("Container not found");
       }
     }
   }, [isFullscreen]);
 
   const handleRequestClose = () => {
-    console.log("Closing MapPopup");
     setTabIndex(0);
     onRequestClose();
-  };
-
-  const renderMediaItem = (item) => {
-    const style = {
-      width: '100%',
-      height: '100%',
-      objectFit: 'contain',
-    };
-
-    if (item.isVideo) {
-      return (
-        <div className={`image-gallery-image ${isFullscreen ? 'fullscreen' : ''}`}>
-          <video controls muted style={style}>
-            <source src={item.original} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        </div>
-      );
-    }
-    return (
-      <div className={`image-gallery-image ${isFullscreen ? 'fullscreen' : ''}`}>
-        <img src={item.original} alt="" style={style} />
-      </div>
-    );
   };
 
   if (!isOpen || !currentMarker) return null;
@@ -194,28 +168,23 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
 
           <div className="popup--display-container">
             {tabIndex === 0 && (
+              
               <TabPanel value={tabIndex} index={0}>
-                <ImageGallery
-                  items={formattedMedia}
-                  showThumbnails={false}
-                  showIndex={true}
-                  showFullscreenButton={true}
-                  showPlayButton={false}
-                  additionalClass="image--custom-image-gallery"
-                  renderItem={renderMediaItem}
-                  useBrowserFullscreen={!isMobile}
-                  onScreenChange={(isFullscreen) => setIsFullscreen(isFullscreen)}
+                  {console.log('[DEBUG] LightGallery dynamicEl:', formattedMedia)}
+                <LightGallery
+                  speed={500}
+                  licenseKey={lightGalleryLic}
+                  plugins={[lgFullscreen, lgVideo]}
+                  dynamic
+                  dynamicEl={formattedMedia}
+                  onBeforeOpen={() => setIsFullscreen(true)}
+                  onCloseAfter={() => setIsFullscreen(false)}
                 />
               </TabPanel>
             )}
             {tabIndex === 1 && (
               <TabPanel value={tabIndex} index={1}>
-                <AIGenComments
-                  currentMarker={currentMarker}
-                  tripID={tripID}
-                  user={user}
-                  resetAIInterview={tabIndex === 1}
-                />
+                <AIGenComments currentMarker={currentMarker} tripID={tripID} user={user} resetAIInterview={tabIndex === 1} />
               </TabPanel>
             )}
             {tabIndex === 2 && (
@@ -248,4 +217,5 @@ MapPopup.propTypes = {
 };
 
 export default MapPopup;
+
 
