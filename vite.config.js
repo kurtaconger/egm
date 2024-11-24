@@ -11,6 +11,7 @@ export default defineConfig({
   resolve: {
     alias: {
       'pdfjs-dist/build/pdf.worker.js': resolve(__dirname, 'node_modules/pdfjs-dist/build/pdf.worker.min.js'),
+      'lightgallery': resolve(__dirname, 'node_modules/lightgallery'),
     },
   },
   build: {
@@ -19,5 +20,8 @@ export default defineConfig({
         chunkFileNames: 'assets/js/[name]-[hash].js',
       },
     },
+  },
+  optimizeDeps: {
+    include: ['lightgallery', 'lightgallery/react', 'lightgallery/plugins/video', 'lightgallery/plugins/thumbnail'],
   },
 });
