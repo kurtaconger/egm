@@ -6,7 +6,7 @@ import Navigation from './components/Navigation';
 import MapPopup from './components/MapPopup';
 import Map from './components/Map';
 import Login from './components/Login';
-import DisplaySopt from './components/DisplaySpot';
+import DisplaySpot from './components/DisplaySpot';
 
 import { loadLocations } from './utils/loadLocations';
 import { db } from './utils/firebase';
@@ -19,12 +19,10 @@ const App = () => {
   const [mapBearing, setMapBearing] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [tripTitle, setTripTitle] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMapPopupOpen, setIsMapPopupOpen] = useState(false);
   const [currentLocation, setCurrentLocation] = useState(null);
   const [user, setUser] = useState(null); // State for logged-in user
   const [tripID, setTripID] = useState(null); // Explicit tripID state
-
-  const [isDisplaySpotOpen, setIsDisplaySpotOpen] = useState(false);
 
 
   const location = useLocation();
@@ -81,8 +79,7 @@ const App = () => {
 
       if (markerSnapshot.exists()) {
         setCurrentLocation({ id: markerId, ...markerSnapshot.data() });
-        // setIsModalOpen(true);
-        setIsDisplaySpotOpen(true);
+        setIsMapPopupOpen(true)
       } else {
         console.warn(`No data found for marker ${markerId}`);
       }
@@ -95,7 +92,7 @@ const App = () => {
     setIsModalOpen(false);
   };
 
-  const handleSpotClose = () => { setIsDisplaySpotOpen(false) }
+  const handleCMapPopupCloes = () => { setIsMapPopupOpen(false) }
 
   const handleRequestNext = () => {
     if (currentLocation) {
@@ -173,21 +170,24 @@ const App = () => {
         rotateMap={rotateMap}
       />
 
-      {/* <MapPopup
-        isOpen={isModalOpen}
-        onRequestClose={handleCloseModal}
-        db={db}
-        currentMarker={currentLocation}
-        tripID={tripID}
-        onRequestNext={handleRequestNext}
-        onRequestPrev={handleRequestPrev}
-        user={user}
-      /> */}
+      {/* {isMapPopupOpen && (
+        <MapPopup
+          onRequestClose={handleCMapPopupCloes}
+          db={db}
+          currentMarker={currentLocation}
+          tripID={tripID}
+          onRequestNext={handleRequestNext}
+          onRequestPrev={handleRequestPrev}
+          user={user}
+        />
+      )} */}
 
 
-      {isDisplaySpotOpen && (
-            <DisplaySopt
-            onRequestClose={handleSpotClose}
+      {isMapPopupOpen && (
+            <DisplaySpot
+            onRequestClose={handleCMapPopupCloes}
+            locations={locations}
+            currentLocation={currentLocation}
             />
       )}
 

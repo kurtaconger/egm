@@ -1,13 +1,17 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useCallback, useState, useEffect, useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Tabs, Tab, Box, Typography } from '@mui/material';
-import ImageGallery from 'react-image-gallery';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import AssistantIcon from '@mui/icons-material/Assistant';
 import EditIcon from '@mui/icons-material/Edit';
 import KeyboardVoiceIcon from '@mui/icons-material/KeyboardVoice';
-import 'react-image-gallery/styles/css/image-gallery.css';
+
+import LightGallery from 'lightgallery/react';
+import lgVideo from 'lightgallery/plugins/video';
+import lgFullscreen from 'lightgallery/plugins/fullscreen';
+
+import 'lightgallery/css/lightgallery.css';
+import 'lightgallery/css/lg-fullscreen.css';
 
 import AIGenComments from './AIGenComments';
 import ManageComments from './ManageComments';
@@ -17,6 +21,7 @@ import loadMedia from '../utils/loadMedia';
 
 import './mapPopup.css';
 
+// Construct Tabs
 const TabPanel = ({ children, value, index, ...other }) => (
   <div
     role="tabpanel"
@@ -40,13 +45,41 @@ TabPanel.propTypes = {
   other: PropTypes.object,
 };
 
-const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext, onRequestPrev, user }) => {
+const MapPopup = ({ onRequestClose, currentMarker, tripID, onRequestNext, onRequestPrev, user }) => {
   const [tabIndex, setTabIndex] = useState(0);
   const [formattedMedia, setFormattedMedia] = useState([]);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [availableVoices, setAvailableVoices] = useState([]);
+  const lightGalleryRef = useRef(null);
+  const containerRef = useRef(null);
+  const [galleryContainer, setGalleryContainer] = useState(null);
 
-  const isMobile = useMediaQuery('(max-width:600px)');
+  const onInit = useCallback((detail) => {
+    if (detail) {
+      lightGalleryRef.current = detail.instance;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      setGalleryContainer(containerRef.current);
+    }
+  }, []);
+
+  useEffect(() => {
+    const fetchMedia = async () => {
+      if (currentMarker) {
+        console.log('Fetching media for marker:', currentMarker);
+        const media = await loadMedia(currentMarker, tripID);
+        const formatted = media.map((item) => ({
+          src: item.original,
+          thumb: item.thumbnail || item.original,
+          poster: item.isVideo ? item.original : undefined,
+        }));
+        console.log('[DEBUG] Formatted Media:', formatted);
+        setFormattedMedia(formatted);
+      }
+    };
+    fetchMedia();
+  }, [currentMarker, tripID]);
 
   const tabs = useMemo(
     () => [
@@ -62,99 +95,11 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
     setTabIndex(newValue);
   };
 
-  const handleExitFullScreen = () => {
-    console.log("Exiting full screen");
-    setIsFullscreen(false);
-    document.body.style.overflow = 'auto';
-  };
-
-  useEffect(() => {
-    const fetchMedia = async () => {
-      if (isOpen && currentMarker) {
-        console.log("Fetching media for marker:", currentMarker);
-        const media = await loadMedia(currentMarker, tripID);
-        const formatted = media.map((item) => ({
-          original: item.original,
-          thumbnail: item.thumbnail || item.original,
-          isVideo: item.isVideo,
-        }));
-        console.log('[DEBUG] Formatted Media:', formatted);
-        setFormattedMedia(formatted);
-      }
-    };
-    fetchMedia();
-  }, [isOpen, currentMarker, tripID]);
-
-  useEffect(() => {
-    if (isOpen) {
-      const loadVoices = () => {
-        console.log("Loading available voices");
-        const voices = window.speechSynthesis.getVoices();
-        if (voices.length > 0) {
-          setAvailableVoices(voices);
-        } else {
-          setTimeout(loadVoices, 500);
-        }
-      };
-      loadVoices();
-    }
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen) {
-      console.log("Popup closed, resetting states");
-      setFormattedMedia([]);
-      setTabIndex(0);
-    } else {
-      console.log("Popup opened");
-    }
-  }, [isOpen]);
-
-  useEffect(() => {
-    console.log("isFullscreen changed:", isFullscreen);
-    if (!isFullscreen) {
-      const container = document.querySelector('.popup--modal-content');
-      if (container) {
-        console.log("Repainting layout for container");
-        container.style.transform = 'scale(1)';
-        container.offsetHeight;
-      } else {
-        console.log("Container not found");
-      }
-    }
-  }, [isFullscreen]);
-
   const handleRequestClose = () => {
-    console.log("Closing MapPopup");
+    console.log('Closing MapPopup');
     setTabIndex(0);
     onRequestClose();
   };
-
-  const renderMediaItem = (item) => {
-    const style = {
-      width: '100%',
-      height: '100%',
-      objectFit: 'contain',
-    };
-
-    if (item.isVideo) {
-      return (
-        <div className={`image-gallery-image ${isFullscreen ? 'fullscreen' : ''}`}>
-          <video controls muted style={style}>
-            <source src={item.original} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        </div>
-      );
-    }
-    return (
-      <div className={`image-gallery-image ${isFullscreen ? 'fullscreen' : ''}`}>
-        <img src={item.original} alt="" style={style} />
-      </div>
-    );
-  };
-
-  if (!isOpen || !currentMarker) return null;
 
   return (
     <div className="popup--modal-overlay" onClick={handleRequestClose}>
@@ -167,7 +112,7 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
             </svg>
           </div>
 
-          <h2 className="popup--spot-location-title">{currentMarker.shortName || 'No Title'}</h2>
+          <h2 className="popup--spot-location-title">{currentMarker?.shortName || 'No Title'}</h2>
 
           <div className="popup--next-location-sgv" onClick={onRequestNext}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="next-button-svg">
@@ -188,34 +133,44 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
         <div className="popup--button-and-display-container">
           <Tabs value={tabIndex} onChange={handleTabChange} aria-label="Map popup tabs">
             {tabs.map((tab, index) => (
-              <Tab key={index} icon={tab.icon} label={<span style={{ fontSize: isMobile ? '12px' : '14px' }}>{tab.label}</span>} />
+              <Tab key={index} icon={tab.icon} label={<span style={{ fontSize: '14px' }}>{tab.label}</span>} />
             ))}
           </Tabs>
 
           <div className="popup--display-container">
             {tabIndex === 0 && (
               <TabPanel value={tabIndex} index={0}>
-                <ImageGallery
-                  items={formattedMedia}
-                  showThumbnails={false}
-                  showIndex={true}
-                  showFullscreenButton={true}
-                  showPlayButton={false}
-                  additionalClass="image--custom-image-gallery"
-                  renderItem={renderMediaItem}
-                  useBrowserFullscreen={!isMobile}
-                  onScreenChange={(isFullscreen) => setIsFullscreen(isFullscreen)}
-                />
+
+                <div className='placeholder'>placeholder</div>
+
+                <div ref={containerRef}></div>
+                <div className="carousel-container">
+                  <LightGallery
+                    container={galleryContainer}
+                    licenseKey="82466149-235C-4086-A637-35D49AFC4BC6"
+                    onInit={onInit}
+                    plugins={[lgVideo, lgFullscreen]}
+                    closable={false}
+                    showMaximizeIcon={true}
+                    slideDelay={400}
+                    appendSubHtmlTo={'.lg-item'}
+                    dynamic={true}
+                    dynamicEl={formattedMedia}
+                    videojs
+                    videojsOptions={{
+                      muted: false,
+                      controls: true,
+                      autoplay: false,
+                    }}
+                    hash={false}
+                    elementClassNames={'inline-gallery-container'}
+                  />
+                </div>
               </TabPanel>
             )}
             {tabIndex === 1 && (
               <TabPanel value={tabIndex} index={1}>
-                <AIGenComments
-                  currentMarker={currentMarker}
-                  tripID={tripID}
-                  user={user}
-                  resetAIInterview={tabIndex === 1}
-                />
+                <AIGenComments currentMarker={currentMarker} tripID={tripID} user={user} resetAIInterview={tabIndex === 1} />
               </TabPanel>
             )}
             {tabIndex === 2 && (
@@ -234,7 +189,6 @@ const MapPopup = ({ isOpen, onRequestClose, currentMarker, tripID, onRequestNext
 };
 
 MapPopup.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
   onRequestClose: PropTypes.func.isRequired,
   currentMarker: PropTypes.shape({
     id: PropTypes.string,
@@ -248,5 +202,3 @@ MapPopup.propTypes = {
 };
 
 export default MapPopup;
-
-
