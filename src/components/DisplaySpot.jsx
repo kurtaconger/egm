@@ -1,163 +1,105 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import LightGallery from 'lightgallery/react';
-import lgVideo from 'lightgallery/plugins/video';
-import lgThumbnail from 'lightgallery/plugins/thumbnail';
-import lgFullscreen from 'lightgallery/plugins/fullscreen';
-
-import 'lightgallery/css/lightgallery.css';
+import { useEffect, useState } from 'react';
 import './style.css';
-import '../utils/firebase'
 import fetchMediaFromFirebase from '../utils/fetchMediaFromFirebase';
 
-
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import { useSwipeable } from 'react-swipeable';
 
 const DisplaySpot = ({ onRequestClose, locations, currentLocation }) => {
-  const lightGalleryRef = useRef(null);
-  const containerRef = useRef(null);
-  const [galleryContainer, setGalleryContainer] = useState(null);
-  const [height, setHeight] = useState('800px'); // Default for wide screens
-  const [formattedMedia, setFormattedMedia] = useState ([])
+  const [formattedMedia, setFormattedMedia] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const onInit = useCallback((detail) => {
-    if (detail) {
-      lightGalleryRef.current = detail.instance;
-      lightGalleryRef.current.openGallery();
+  const handleNext = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % formattedMedia.length);
+  };
 
-    }
-  }, []);
+  const handlePrevious = () => {
+    setCurrentIndex((prevIndex) =>
+      prevIndex === 0 ? formattedMedia.length - 1 : prevIndex - 1
+    );
+  };
 
-  useEffect(() => {
-    if (containerRef.current) {
-      setGalleryContainer(containerRef.current);
-    }
-  }, []);
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
 
-
-  // Adjust the height dynamically based on screen size
-  useEffect(() => {
-    const adjustHeight = () => {
-      const width = window.innerWidth;
-
-      if (width > 800) {
-        setHeight('800px'); // Wide screen
-      } else {
-        setHeight('60vh'); // Narrow screen
-      }
-    };
-
-    window.addEventListener('resize', adjustHeight);
-    adjustHeight(); // Call once on mount
-
-    return () => {
-      window.removeEventListener('resize', adjustHeight);
-    };
-  }, []);
-
-
+  const handlers = useSwipeable({
+    onSwipedLeft: handleNext,
+    onSwipedRight: handlePrevious,
+    preventScrollOnSwipe: true,
+    trackMouse: true,
+  });
 
   useEffect(() => {
     const fetchMedia = async () => {
       if (currentLocation && locations) {
-        const mediaPaths = currentLocation.media; 
+        const mediaPaths = currentLocation.media;
         const mediaItems = await fetchMediaFromFirebase(mediaPaths);
-        console.log(`[DEBUG] Successfully loaded media items:`, mediaItems);
-    
-        const formatted = mediaItems.map((item) => ({
-          src: item.original,
-          thumb: item.thumbnail || item.original,
-          poster: item.isVideo ? item.original : undefined,
-          subHtmlUrl: '',
-        }));
-        
-        console.log('[DEBUG] Formatted Media:', formatted);
+        const formatted = mediaItems.map((item) => item.original);
+        console.log ("formatted media " + formatted[2])
         setFormattedMedia(formatted);
       }
     };
-  
+
     fetchMedia();
-  }, [currentLocation]); // <-- This closing square bracket and parenthesis are correct
+  }, [currentLocation]);
 
-
-
-  const galleryItems = [
-    {
-      src: 'https://images.unsplash.com/photo-1542103749-8ef59b94f47e?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1400&q=80', // Image
-      thumb: 'https://images.unsplash.com/photo-1542103749-8ef59b94f47e?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80',
-    },
-    {
-      src: 'https://www.youtube.com/watch?v=IUN664s7N-c', // Video
-      poster: 'https://img.youtube.com/vi/IUN664s7N-c/hqdefault.jpg', // Thumbnail for the video
-    },
-    {
-      src: 'https://www.youtube.com/watch?v=ttLu7ygaN6I', // Video
-      poster: 'https://img.youtube.com/vi/ttLu7ygaN6I/hqdefault.jpg', // Thumbnail for the video
-    },
-    {
-      src: 'https://www.youtube.com/watch?v=C3vyugaBhSs', // Video
-      poster: 'https://img.youtube.com/vi/C3vyugaBhSs/hqdefault.jpg', // Thumbnail for the video
-    },
-  ];
+  const renderMedia = () => {
+    const currentMedia = formattedMedia[currentIndex];
+    console.log('Current media being rendered:', currentMedia);
+  
+    if (currentMedia?.endsWith('.mp4')) {
+      return (
+        <video controls autoplay muted style="width: 100%; height: auto;">
+        https://firebasestorage.googleapis.com/v0/b/your-bucket/o/uploaded_media%2FBezos-yacht-mp4.mp4?alt=media&token=xyz
+      </video>
+      
+      );
+    }
+  
+    return (
+      <img
+        src={currentMedia}
+        alt={`Slide ${currentIndex + 1}`}
+        className="gallery-image"
+        style={{ width: '100%', height: 'auto' }}
+      />
+    );
+  };
+  
 
   return (
-
-
     <div className="popup--modal-overlay" onClick={onRequestClose}>
       <div className="popup--modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="App">
-          <HeaderComponent />
-          <div
-            ref={containerRef}
-            style={{
-              height: height,
-            }}
-          ></div>
-          <div>
-            <div className="carousel-container">
-              <LightGallery
-                container={galleryContainer}
-                licenseKey="82466149-235C-4086-A637-35D49AFC4BC6"
-                onInit={onInit}
-                plugins={[lgVideo, lgFullscreen]}
-                closable={false}
-                showMaximizeIcon={true}
-                slideDelay={400}
-                thumbWidth={130}
-                thumbHeight={'100px'}
-                thumbMargin={6}
-                appendSubHtmlTo={'.lg-item'}
-                dynamic={true}
-                dynamicEl={galleryItems}
-                videojs
-                videojsOptions={{
-                  muted: false,
-                  controls: true, // Ensure the controls are displayed
-                  autoplay: false,
-                }}
-                hash={false}
-                elementClassNames={'inline-gallery-container'}
-              ></LightGallery>
+          <div className="carousel-container">
+            <div
+              {...handlers}
+              className={`image-gallery ${isFullscreen ? 'fullscreen' : ''}`}
+            >
+              <ArrowBackIosNewIcon
+                className="arrow back-arrow"
+                onClick={handlePrevious}
+              />
+              {renderMedia()}
+              <ArrowForwardIosIcon
+                className="arrow forward-arrow"
+                onClick={handleNext}
+              />
+              <FullscreenIcon
+                className="fullscreen-icon"
+                onClick={toggleFullscreen}
+              />
+              <div className="indicator">{`${currentIndex + 1} / ${formattedMedia.length}`}</div>
             </div>
           </div>
         </div>
+      </div>
     </div>
- </div>
   );
 };
 
-const HeaderComponent = () => (
-  <div className="popup--header">
-    <a
-      className="popup--header-button"
-      href="https://github.com/sachinchoolur/lightGallery"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      View on GitHub
-    </a>
-  </div>
-);
-
 export default DisplaySpot;
-
-
-
