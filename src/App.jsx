@@ -6,7 +6,7 @@ import Navigation from './components/Navigation';
 import MapPopup from './components/MapPopup';
 import Map from './components/Map';
 import Login from './components/Login';
-import DisplaySpot from './components/DisplaySpot';
+import DisplaySpot from './components/DisplayMedia';
 
 import { loadLocations } from './utils/loadLocations';
 import { db } from './utils/firebase';
@@ -94,27 +94,6 @@ const App = () => {
 
   const handleCMapPopupCloes = () => { setIsMapPopupOpen(false) }
 
-  const handleRequestNext = () => {
-    if (currentLocation) {
-      const currentLocNumber = currentLocation.seq;
-      const nextLocation =
-        locations.find((loc) => loc.seq === currentLocNumber + 1) || locations[0];
-      setCurrentLocation(nextLocation);
-      setIsModalOpen(true);
-    }
-  };
-
-  const handleRequestPrev = () => {
-    if (currentLocation) {
-      const currentLocNumber = currentLocation.seq;
-      const prevLocation =
-        locations.find((loc) => loc.seq === currentLocNumber - 1) ||
-        locations[locations.length - 1];
-      setCurrentLocation(prevLocation);
-      setIsModalOpen(true);
-    }
-  };
-
   const handleLogin = (user) => {
     setUser(user);
     console.log('User logged in:', user);
@@ -170,27 +149,15 @@ const App = () => {
         rotateMap={rotateMap}
       />
 
-      {/* {isMapPopupOpen && (
+      {isMapPopupOpen && (
         <MapPopup
           onRequestClose={handleCMapPopupCloes}
           db={db}
           currentMarker={currentLocation}
           tripID={tripID}
-          onRequestNext={handleRequestNext}
-          onRequestPrev={handleRequestPrev}
           user={user}
         />
-      )} */}
-
-
-      {isMapPopupOpen && (
-            <DisplaySpot
-            onRequestClose={handleCMapPopupCloes}
-            locations={locations}
-            currentLocation={currentLocation}
-            />
       )}
-
 
     </div>
   );
