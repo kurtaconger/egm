@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../utils/firebase';
 import PropTypes from 'prop-types'; 
-import './LocationDetails.css'
+import './locationDetails.css'
 
 
 
