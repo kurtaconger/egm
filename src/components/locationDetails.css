@@ -1,0 +1,395 @@
+/* LOCATION DETAIL POPUP  */
+.popup--modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1500;
+}
+
+.popup--modal-content {
+  background: white;
+  border-radius: 5px;
+  width: 650px;
+  min-height: 700px;
+  border: 5px solid green;
+  max-width: 85%;
+  min-width: 400px;
+  transform: translateY(5%);
+  z-index: 1600;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  /* justify-content: space-around ; */
+}
+
+.popup--header-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  align-items: center;
+  padding: 5px 20px;
+  border-bottom: 2px solid var(--SYellow);
+}
+
+.popup--location-title {
+  margin: 0 auto;
+  color: var(--sDarkBlue);
+  font-family: 'Roboto';
+  font-size: 18px;
+}
+
+.popup--close-window-sgv,
+.popup--previous-location-sgv,
+.popup--next-location-sgv {
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.popup--previous-location-sgv {
+ Margin-left: 8px;
+}
+
+.popup--next-location-sgv {
+  margin-left: 8px;
+}
+
+
+.popup--app-border {
+  border: 6px solid black; /* Outer border for everything */
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px;
+  height: 640px; /* Fixed height for the entire container */
+  min-width: 600px; /* Ensures minimum width of 600px */
+  display: flex;
+  flex-direction: column;
+}
+
+.popup--app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.popup--button-bar {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 10px;
+}
+
+.popup--top-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 10px;
+}
+
+.popup--top-button span {
+  margin-top: 5px;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.popup--container-display {
+  flex: 1; /* Fills the remaining space below the buttons */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* margin: 4px;  */
+}
+
+.popup--container {
+  flex: 1; /* Ensures the inner container stretches fully */
+  width: 100%; /* Ensures the container spans full width */
+  height: 100%; /* Fills the available vertical space */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 4px solid;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* Unique border colors for each container */
+.popup--media {
+  display: flex;
+  flex: 1; 
+  background-color: #e8f4ff;
+}
+
+.popup--ai-gen {
+  border-color: var(--SYellow );
+  background-color: white
+}
+
+.popup--edit-comments {
+  border-color: orange;
+  color: orange;
+  background-color: #fff5e6;
+}
+
+.popup--comments-summary {
+  border-color:black;
+}
+
+@media (max-width: 768px) {
+  .popup--app-container {
+    flex-direction: column-reverse; /* Moves button-bar to the bottom */
+  }
+
+  .popup--button-bar {
+    margin-bottom: 0; /* Reset margin since buttons are at the bottom */
+    margin-top: 10px; /* Add space above buttons */
+    flex-wrap: wrap; /* Allow buttons to wrap if needed */
+  }
+
+  .popup--container-display {
+    margin: 4px 0; /* Adjust vertical margins for spacing */
+  }
+}
+
+
+/* INTERVIEW USER AND GENERATE COMMENTS  */
+.genai--container {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch; /* Ensures children stretch fully */
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    align-content: space-between;
+}
+
+.genai--textarea {
+    margin: 0;
+    padding: 4px;
+    line-height: 1.5;
+    box-sizing: border-box;
+    width: 100%;
+    height: 350px;
+}
+
+.genai--instruction {
+    margin: 4px;
+    padding: 4px;
+    box-sizing: border-box;
+    color: var(--sDarkBlue);
+    text-align: left;
+    width: 100%;
+}
+  
+
+.genai--button-container {
+    display: flex;
+    justify-content: space-evenly;
+    padding: 5px;
+    margin-top: auto; /* Push to the bottom of the container */
+    margin-bottom: 4px; /* Ensure 4px above the gold line */
+    box-sizing: border-box;
+}
+
+
+.genai--button {
+  background-color: #004466;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  cursor: pointer;
+  flex-grow: 1;
+  text-align: center;
+  margin: 0 5px;
+  max-width: 130px;
+
+  display: flex;          /* Make content a flex column */
+  flex-direction: column; /* Icons appear above text */
+  align-items: center;    /* Center both icon and text */
+  justify-content: center;
+}
+
+.genai--button svg { 
+  margin-bottom: 4px; /* Add spacing between icon and text */
+  font-size: 1.5em;   /* Adjust icon size */
+}
+
+  
+  .genai--button:disabled {
+    background-color: #b0b0b0;
+    cursor: not-allowed;
+  }
+  
+    /* MEDIA GALLERY  */
+  .popup--media,
+  .carousel-container {
+    display: flex;
+    flex-direction: column; /* Ensures full vertical stacking */
+    justify-content: center; /* Vertically centers content */
+    align-items: center; /* Horizontally centers content */
+    width: 100%;
+    height: 100%; /* Force the height to match parent container */
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  .image-gallery {
+    position: relative;
+    width: 100%;
+    height: 100%; /* Ensures full height of the container */
+    display: block; /* Prevents any inline spacing */
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    border: 3px solid red;
+  }
+  
+  .gallery-image {
+    width: 100%; /* Stretch horizontally */
+    height: 100%; /* Stretch vertically */
+    object-fit: contain; /* Ensures no cropping while filling the space */
+    display: block; /* Remove inline spacing */
+    margin: 0;
+    padding: 0;
+  }
+  
+  
+  
+  .arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    padding: 8px;
+    cursor: pointer;
+    z-index: 2;
+  }
+  
+  .fullscreen-icon {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    padding: 8px;
+    cursor: pointer;
+    z-index: 3;
+  }
+  
+  .indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+    z-index: 3;
+  }
+  
+  .gallery-video {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+    outline: none;
+    display: block;
+  }
+  
+  
+  .arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    padding: 8px;
+    cursor: pointer;
+    z-index: 2;
+  }
+  
+  .back-arrow {
+    left: 5%;
+  }
+  
+  .forward-arrow {
+    right: 5%;
+  }
+  
+  
+  .fullscreen-icon:hover {
+    background-color: rgba(255, 255, 255, 0.7);
+    color: black;
+  }
+  
+  
+  /* Media Query for Small Screens (iPhone and similar devices) */
+  @media (max-width: 800px) {
+    .image-gallery.fullscreen {
+      width: 100vw; /* Full screen width */
+      height: 100vh; /* Full screen height */
+      padding: 0; /* Reset padding for iPhones */
+    }
+  
+  }
+  
+
+   /* COMMENTS EDITED BY USER */
+ .comments--editor-control-div {
+  border: 1px solid var(--SYellow);
+  height: 100%;
+  width: 100%;
+  margin: auto;
+  overflow-y: auto;
+  font-family: 'Nunito';
+  font-size: 15px;
+  font-style: normal;
+  text-align: left;
+  line-height: 1.5;
+  padding: 4px;
+}
+
+
+
+/* COMMENTS SUMNERY GENERATED BY AI*/
+.comments-summery-div {
+  padding: 0;
+  border: 0;
+}
+
+.comments-summery-text {
+  border: none;
+  height: 100%;
+  width: 100%;
+  margin: auto;
+  overflow-y: auto;
+  font-family: 'Nunito';
+  font-size: 13px;
+  font-style: normal;
+  text-align: left;
+  line-height: 1.5;
+  padding: 6px;
+}
+
+
+  
+  

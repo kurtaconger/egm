@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { collection, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
-import mapboxSdk from '@mapbox/mapbox-sdk/services/geocoding';
 
 import { db } from '../utils/firebase';
 
@@ -18,9 +17,7 @@ const Setup = ({ onClose, mapboxAccessToken }) => {
   const [stopsText, setStopsText] = useState('');
   const [newTripID, setNewTripID] = useState(null);
 
-  const geocodingClient = mapboxSdk({ accessToken: mapboxAccessToken });
-
-  const parametersDocRef = doc(db, 'MAP-GLOBAL', 'parameters');
+  const parametersDocRef = doc(db, 'TRIP-GLOBAL', 'parameters');
 
   // Get the next available Trip ID
   useEffect(() => {
@@ -65,23 +62,28 @@ const Setup = ({ onClose, mapboxAccessToken }) => {
     setLoading(true);
     const stops = stopsText.split('\n').map((stop) => stop.trim()).filter(Boolean);
     const geocodedStops = [];
-
+  
     for (let stop of stops) {
       try {
-        const response = await geocodingClient
-          .forwardGeocode({
-            query: stop,
-            limit: 1,
-          })
-          .send();
-
-        if (response.body.features.length > 0) {
-          const feature = response.body.features[0];
+        const response = await fetch(
+          `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+            stop
+          )}&key=AIzaSyAPVIvSZvycKh2JwhJ3bk8qO3fcjBygeN0`
+        );
+  
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+  
+        const data = await response.json();
+  
+        if (data.results.length > 0) {
+          const result = data.results[0];
           geocodedStops.push({
-            name: feature.place_name,
-            shortName: feature.place_name.split(',')[0].trim(),
-            lat: feature.center[1],
-            lng: feature.center[0],
+            name: result.formatted_address,
+            shortName: result.address_components[0].long_name,
+            lat: result.geometry.location.lat,
+            lng: result.geometry.location.lng,
           });
         } else {
           geocodedStops.push({
@@ -101,11 +103,12 @@ const Setup = ({ onClose, mapboxAccessToken }) => {
         });
       }
     }
-
+  
     setStopsText(geocodedStops.map((stop) => stop.name).join('\n'));
     setLoading(false);
     return geocodedStops;
   };
+  
 
   const checkValidEmail = () => {
     const validate = (emails) =>
@@ -129,7 +132,7 @@ const Setup = ({ onClose, mapboxAccessToken }) => {
   const handleSaveTitleAndSpots = async () => {
     console.log ("saving")
     try {
-      const collectionName = `MAP-${newTripID}-APP`;
+      const collectionName = `TRIP-${newTripID}-APP`;
       const configDocRef = doc(db, collectionName, 'config');
 
       await setDoc(configDocRef, { tripTitle: newTripTitle });
@@ -149,7 +152,7 @@ const Setup = ({ onClose, mapboxAccessToken }) => {
       return;
     }
 
-    const collectionName = `MAP-${newTripID}-DATA`;
+    const collectionName = `TRIP-${newTripID}-DATA`;
     const promises = geocodedStops.map((stop, index) => {
       const stopID = `Spot-${String(index + 1).padStart(2, '0')}`;
       const spotRef = doc(collection(db, collectionName), stopID);
@@ -176,7 +179,7 @@ const Setup = ({ onClose, mapboxAccessToken }) => {
   const handleSaveUsers = async () => {
     setLoading(true);
     setDisplayMessageforUsers('');
-    const collectionName = `MAP-${newTripID}-USERS`;
+    const collectionName = `TRIP-${newTripID}-USERS`;
     const dateToday = new Date().toISOString().split('T')[0];
 
     const processEmails = async (emails, readOnly) => {

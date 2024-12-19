@@ -9,12 +9,12 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 import { db } from '../utils/firebase';
 
-import './mapPopup.css';
-
+import './locationDetails.css';
 
 const AIGenComments = ({ currentMarker, tripID, user }) => {
     // State variables
     const [userResponse, setUserResponse] = useState('');
+    const [showInstruction, setShowInstruction] = useState(true);
     const [processedText, setProcessedText] = useState('');
     const [isListening, setIsListening] = useState(false);
     const [remainingTime, setRemainingTime] = useState(30);
@@ -199,9 +199,9 @@ const AIGenComments = ({ currentMarker, tripID, user }) => {
 
     // Save summarized response to Firebase
     const saveSummary = async () => {
-        const docRef = doc(db, `MAP-${tripID}-DATA`, currentMarker.id);
+        const docRef = doc(db, `TRIP-${tripID}-DATA`, currentMarker.id);
         const newContent = `<p><span color="${user.hexColor}" data-color="${user.hexColor}" style="color: ${user.hexColor}">[${user.displayName}] ${processedText}</span></p>`;
-        
+    
         try {
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
@@ -209,7 +209,11 @@ const AIGenComments = ({ currentMarker, tripID, user }) => {
                 const updatedContent = currentContent ? currentContent + newContent : newContent;
                 await updateDoc(docRef, { content: updatedContent });
                 console.log("Summary saved:", updatedContent);
-                setProcessedText(`Your most memorable experience for ${currentSpotName} was saved to the joint narrative. Press the "Edit Comments" above button to see the joint narrative.`);
+    
+                // Hide the instruction message
+                setShowInstruction(false);
+    
+                setProcessedText(`Your most memorable experience for ${currentSpotName} was saved to the joint narrative. Press the "Edit Comments" button above to see the joint narrative.`);
             } else {
                 console.error("Document does not exist!");
             }
@@ -217,6 +221,7 @@ const AIGenComments = ({ currentMarker, tripID, user }) => {
             console.error("Error saving summary:", error);
         }
     };
+    
 
     // Stop recording manually and start processing
     const stopRecording = () => {
@@ -241,34 +246,35 @@ const AIGenComments = ({ currentMarker, tripID, user }) => {
     };
 
     return (
-        <div className="ai-gen-container">
+        <div className="genai--container">
             {!micPermission && <p style={{ color: 'red' }}>Microphone access is denied. Please enable it in your browser settings.</p>}
 
             <textarea
-                className="ai-gen-textarea"
+                className="genai--textarea"
                 value={processedText}
                 onChange={(e) => setProcessedText(e.target.value)}
-                rows="10"
                 placeholder="Listening . . ."
             />
 
-            {!isListening && !isProcessing && processedText && (
-                <p className="ai-gen-instruction">
+
+            {showInstruction && !isListening && !isProcessing && processedText && (
+                <p className="genai--instruction">
                     Update the summary created by ChatGPT, then press 'Save' below to save to the joint narrative.
                 </p>
             )}
 
-            <div className="ai-gen-button-container">
-                <button className="ai-gen-button" onClick={addMoreTime} disabled={!isListening}>
+
+            <div className="genai--button-container">
+                <button className="genai--button" onClick={addMoreTime} disabled={!isListening}>
                     <MoreTimeIcon /> Add More Time
                 </button>
-                <button className="ai-gen-button" onClick={stopRecording} disabled={!isListening}>
+                <button className="genai--button" onClick={stopRecording} disabled={!isListening}>
                     <HighlightOffIcon /> Stop Recording
                 </button>
-                <button className="ai-gen-button" onClick={eraseAndReRecord}>
+                <button className="genai--button" onClick={eraseAndReRecord}>
                     <RestoreIcon /> Erase and Re-record
                 </button>
-                <button className="ai-gen-button" onClick={saveSummary}>
+                <button className="genai--button" onClick={saveSummary}>
                     <CloudUploadIcon /> Save to Cloud
                 </button>
             </div>
@@ -284,7 +290,6 @@ AIGenComments.propTypes = {
     tripID: PropTypes.string.isRequired,
     user: PropTypes.shape({
         displayName: PropTypes.string.isRequired,
-        hexColor: PropTypes.string.isRequired,
     }).isRequired,
 };
 

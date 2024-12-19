@@ -6,7 +6,7 @@ import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 import { db } from '../utils/firebase';
 
-import './mapPopup.css'
+import './locationDetails.css';
 
 const colors = {
   Kurt: '#0000CC', // Blue
@@ -52,7 +52,11 @@ const ManageComments = ({ user, currentMarker, tripID }) => {
   }
 
   const currentUser = user.displayName;
-  const tripNameData = "MAP-" + tripID + "-DATA";
+  console.log ("user  ", currentUser)
+  const currentUserHexColor = user.hexColor;
+  console.log ("user color ", currentUserHexColor)
+  const tripNameData = "TRIP-" + tripID + "-DATA";
+
   const currentDocumentID = currentMarker.id;
 
   const editor = useEditor({

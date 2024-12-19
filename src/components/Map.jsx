@@ -6,8 +6,6 @@ import '../index.css';
 import { drawLinesBetweenLocations } from '../utils/lineDrawing';
 import { getFirstPictureUrl } from '../utils/getFirstPictureUrl';
 
-
-
 const Map = ({
   mapBoxToken,
   locations,
@@ -27,12 +25,6 @@ const Map = ({
     return id.replace(/\s+/g, '-').replace(/[^\w-]/g, '');
   };
 
-  const doesLocationHaveContent = (location) => {
-    console.log ("****IN HAS COMMENTS " + location.content)
-    return location && location.content && location.content.trim() !== '';
-  };
-
-
   useEffect(() => {
     if (locations.length > 0 && !mapRef.current) {
       mapboxgl.accessToken = mapBoxToken;
@@ -46,13 +38,9 @@ const Map = ({
       });
 
       if (!bounds.isEmpty()) {
-        const center = bounds.getCenter();
-
         mapRef.current = new mapboxgl.Map({
           container: mapContainerRef.current,
           style: 'mapbox://styles/mapbox/streets-v12',
-          center: [center.lng, center.lat],
-          zoom: 8,
           bearing: mapBearing,
         });
 
@@ -103,10 +91,14 @@ const Map = ({
           }
         });
 
-        mapRef.current.fitBounds(bounds, { padding: { top: 150, bottom: 150, left: 100, right: 100 } });
+        // Fit the map to the bounds with padding and a maximum zoom level
+        mapRef.current.fitBounds(bounds, {
+          padding: { top: 150, bottom: 150, left: 100, right: 100 },
+          maxZoom: 15, // Prevent zooming in too far
+        });
       }
     }
-  }, [locations, mapBearing]); // Added dependency on hasCommentsData
+  }, [locations, mapBearing]);
 
   useEffect(() => {
     popupsRef.current.forEach((popup) => {
@@ -124,6 +116,22 @@ const Map = ({
       mapRef.current.triggerRepaint();
     }
   }, [mapBearing]);
+
+  useEffect(() => {
+    if (mapRef.current && locations.length > 0) {
+      const bounds = new mapboxgl.LngLatBounds();
+      locations.filter(hasValidCoordinates).forEach((location) => {
+        bounds.extend([location.lng, location.lat]);
+      });
+
+      if (!bounds.isEmpty()) {
+        mapRef.current.fitBounds(bounds, {
+          padding: { top: 150, bottom: 150, left: 100, right: 100 },
+          maxZoom: 15,
+        });
+      }
+    }
+  }, [locations]);
 
   return (
     <div>

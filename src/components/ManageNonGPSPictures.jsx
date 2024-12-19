@@ -40,7 +40,7 @@ function ManageNonGPSPictures({ onCancel, tripID }) {
         const fetchLocations = async () => {
             try {
                 console.log("Fetching locations for tripID:", tripID);
-                const locationsCollectionRef = collection(db, "MAP-" + tripID + "-DATA");
+                const locationsCollectionRef = collection(db, "TRIP-" + tripID + "-DATA");
                 const locationSnapshot = await getDocs(locationsCollectionRef);
                 const locationList = locationSnapshot.docs.map(doc => ({
                     shortName: doc.data().shortName,
@@ -84,7 +84,7 @@ function ManageNonGPSPictures({ onCancel, tripID }) {
             }
 
             console.log("Updating Firestore document for location:", selectedLocation);
-            const locationDocRef = doc(db, `MAP-${tripID}-DATA`, locationDoc.id);
+            const locationDocRef = doc(db, `TRIP-${tripID}-DATA`, locationDoc.id);
 
             // Append the file path to the `media` array field
             await updateDoc(locationDocRef, {

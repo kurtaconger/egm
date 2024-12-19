@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../utils/firebase';
 import PropTypes from 'prop-types'; 
-import './mapPopup.css';
+import './LocationDetails.css'
 
 
 
@@ -16,7 +16,7 @@ const CommentsSummery = ({ currentMarker, tripID }) => {
     console.log ("COMMENTS SUMMERY " + currentMarker)
     const currentDocumentID = currentMarker.id;
     console.log ("COMMENTS SUMMERY ID " + currentMarker.id)
-    const tripNameData = "MAP-" + tripID + "-DATA" 
+    const tripNameData = "TRIP-" + tripID + "-DATA" 
     console.log ("COMMENTS SUMMERY TRIP ID " + tripNameData)
 
     const prefixQuestionText = `The following is a set of comments we had during a trip. Summarize the comments. 
@@ -106,10 +106,6 @@ const CommentsSummery = ({ currentMarker, tripID }) => {
         <p className="comments-summery-text" dangerouslySetInnerHTML={{ __html: responseText }}></p>
       </div>
     );
-};
-
-CommentsSummery.propTypes = {
-  currentDocumentID: PropTypes.string.isRequired,
 };
 
 export default CommentsSummery;

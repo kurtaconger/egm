@@ -1,36 +1,22 @@
 import { useEffect, useState } from 'react';
-import './style.css';
-import { initializeApp } from 'firebase/app';
-import { getStorage, ref, getDownloadURL } from 'firebase/storage';
+import { ref, getDownloadURL } from 'firebase/storage';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
-
-// Firebase Configuration
-const firebaseConfig = {
-  apiKey: 'AIzaSyCF3ydrhMuURLzs09E_wk0TZyjx4-vJWQw',
-  authDomain: 'm-y-m-660ec.firebaseapp.com',
-  projectId: 'm-y-m-660ec',
-  storageBucket: 'm-y-m-660ec.appspot.com',
-  messagingSenderId: '509277052904',
-  appId: '1:509277052904:web:1122937f1d33c2a2540e5d',
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const storage = getStorage(app);
+import { storage } from '../utils/firebase';
+import './locationDetails.css';
 
 const DisplayMedia = ({ currentMarker }) => {
   const [mediaUrls, setMediaUrls] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchMedia = async () => {
       try {
         if (!currentMarker || !currentMarker.media || !Array.isArray(currentMarker.media)) {
-          console.error('Invalid currentMarket or media array');
+          console.error('Invalid currentMarker or media array');
           return;
         }
 
@@ -43,7 +29,7 @@ const DisplayMedia = ({ currentMarker }) => {
         );
 
         setMediaUrls(urls);
-        setLoading(false); // Mark as loaded
+        setLoading(false);
         console.log('Media URLs fetched:', urls);
       } catch (error) {
         console.error('Error fetching media URLs:', error);
@@ -51,6 +37,11 @@ const DisplayMedia = ({ currentMarker }) => {
     };
 
     fetchMedia();
+  }, [currentMarker]);
+
+  // Reset currentIndex to 0 when currentMarker changes
+  useEffect(() => {
+    setCurrentIndex(0); // Reset index
   }, [currentMarker]);
 
   const handleNext = () => {
@@ -79,11 +70,9 @@ const DisplayMedia = ({ currentMarker }) => {
       return (
         <video
           controls
-          autoPlay
           muted
           loop
           className="gallery-video"
-          style={{ width: '100%', height: 'auto' }}
         >
           <source src={currentMedia} type="video/mp4" />
           Your browser does not support the video tag.
@@ -96,39 +85,40 @@ const DisplayMedia = ({ currentMarker }) => {
         src={currentMedia}
         alt={`Slide ${currentIndex + 1}`}
         className="gallery-image"
-        style={{ width: '100%', height: 'auto' }}
       />
     );
   };
 
-  // Ensure rendering happens only after media is loaded
   if (loading) {
-    return <div className="popup--modal-overlay"><p>Loading media...</p></div>;
+    return (
+      <div className="popup--modal-overlay">
+        <p>Loading media...</p>
+      </div>
+    );
   }
 
   return (
-
-          <div className="carousel-container">
-            <div className={`image-gallery ${isFullscreen ? 'fullscreen' : ''}`}>
-              <ArrowBackIosNewIcon
-                className="arrow back-arrow"
-                onClick={handlePrevious}
-              />
-              {renderMedia()}
-              <ArrowForwardIosIcon
-                className="arrow forward-arrow"
-                onClick={handleNext}
-              />
-              <FullscreenIcon
-                className="fullscreen-icon"
-                onClick={toggleFullscreen}
-              />
-              <div className="indicator">{`${currentIndex + 1} / ${mediaUrls.length}`}</div>
-            </div>
-          </div>
-
+    <div className="carousel-container">
+      <div className={`image-gallery ${isFullscreen ? 'fullscreen' : ''}`}>
+        <ArrowBackIosNewIcon
+          className="arrow back-arrow"
+          onClick={handlePrevious}
+        />
+        {renderMedia()}
+        <ArrowForwardIosIcon
+          className="arrow forward-arrow"
+          onClick={handleNext}
+        />
+        <FullscreenIcon
+          className="fullscreen-icon"
+          onClick={toggleFullscreen}
+        />
+        <div className="indicator">{`${currentIndex + 1} / ${mediaUrls.length}`}</div>
+      </div>
+    </div>
   );
 };
 
 export default DisplayMedia;
+
 

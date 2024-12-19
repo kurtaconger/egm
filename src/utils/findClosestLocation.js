@@ -23,7 +23,7 @@ export const findClosestLocation = async (db, tripID, gpsData) => {
     console.log("tripID:", tripID);
     console.log("GPS Data:", gpsData);
 
-    const locationCollectionRef = collection(db, `MAP-${tripID}-DATA`);
+    const locationCollectionRef = collection(db, `TRIP-${tripID}-DATA`);
 
     try {
         const locationSnapshot = await getDocs(locationCollectionRef);

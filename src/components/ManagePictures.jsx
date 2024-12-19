@@ -119,7 +119,7 @@ function ManagePictures({ isPictureModalOpen, closePictureModal, tripID }) {
             // Update Firestore
             for (let location of closest) {
                 if (location.documentId && location.fileRef) {
-                    const locationRef = doc(db, `MAP-${tripID}-DATA`, location.documentId);
+                    const locationRef = doc(db, `TRIP-${tripID}-DATA`, location.documentId);
 
                     try {
                         await updateDoc(locationRef, {

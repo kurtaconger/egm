@@ -234,8 +234,6 @@
 
 
 /* user login  */
-
-
 .model--login-text {
   line-height: 1.5;
   margin-top: 10px;
@@ -262,9 +260,6 @@
   background-color: var(--SYellow);
   color: var(--sDarkBlue);
 }
-
-
-
 
 
 
@@ -309,12 +304,10 @@
   border-radius: 5px;
   cursor: pointer;
 }
-  
 
 
 
-/* Grid container */
- /* Grid container */
+ /* configure trip */
 .config--body {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -360,3 +353,48 @@
     justify-content: space-between;
   }
 }
+
+
+ /* Select and Edit Trip   */
+ .select--body {
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.select--container {
+  padding: 10px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid var(--sDarkBlue)
+}
+
+.select--label {
+  margin: 8px 0 2px 0;
+}
+
+.select--button-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.select--textarea,
+.select--input {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid var(--SYellow);
+  border-radius: 4px;
+}
+
+
+
+
+
+
+
+
+
+

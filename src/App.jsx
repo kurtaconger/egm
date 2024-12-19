@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { getDoc, doc } from 'firebase/firestore';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import './index.css';
 import Navigation from './components/Navigation';
-import MapPopup from './components/MapPopup';
+// import MapPopup from './components/MapPopup';
+import LocationDetails from './components/LocationDetails'
+
 import Map from './components/Map';
 import Login from './components/Login';
-import DisplaySpot from './components/DisplayMedia';
 
 import { loadLocations } from './utils/loadLocations';
 import { db } from './utils/firebase';
@@ -26,8 +27,17 @@ const App = () => {
 
 
   const location = useLocation();
+  const navigate = useNavigate();
 
   const sanitizeId = (id) => id.replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+
+  const handleTripChange = (newTripID) => {
+    if (newTripID !== tripID) {
+      setTripID(newTripID);
+      navigate(`/?ID=${newTripID}`); // Update the URL with the new tripID
+    }
+  };
+
 
   const loadTripData = async () => {
     try {
@@ -37,14 +47,17 @@ const App = () => {
       if (!tripIDParam) throw new Error('Trip ID is missing in URL.');
       setTripID(tripIDParam);
 
-      const tripNameApp = `MAP-${tripIDParam}-APP`;
+      const tripNameApp = `TRIP-${tripIDParam}-APP`;
+      console.log ("tripNameApp: ", tripNameApp)
 
       // Fetch Trip Title
       const tripTitleDocRef = doc(db, tripNameApp, 'config');
       const tripTitleSnapshot = await getDoc(tripTitleDocRef);
       if (tripTitleSnapshot.exists()) {
-        const { tripTitle } = tripTitleSnapshot.data();
-        setTripTitle(tripTitle);
+
+        const  { tripTitle } = tripTitleSnapshot.data();
+        console.log ("retreived trip Title ", tripTitle)
+        setTripTitle(tripTitle);  
       } else {
         throw new Error('No map title found at the specified path');
       }
@@ -63,6 +76,12 @@ const App = () => {
     loadTripData();
   }, [location.search]);
 
+  useEffect(() => {
+    if (tripID) {
+      loadTripData();
+    }
+  }, [tripID]); 
+
   const toggleMapPopups = () => {
     setShowPopups(!showPopups);
   };
@@ -74,7 +93,7 @@ const App = () => {
 
   const handlePopupClick = async (markerId) => {
     try {
-      const markerRef = doc(db, `MAP-${tripID}-DATA`, markerId);
+      const markerRef = doc(db, `TRIP-${tripID}-DATA`, markerId);
       const markerSnapshot = await getDoc(markerRef);
 
       if (markerSnapshot.exists()) {
@@ -98,6 +117,8 @@ const App = () => {
     setUser(user);
     console.log('User logged in:', user);
   };
+
+
 
   // Wait for tripID and tripTitle to load before showing Login or app content
   if (isLoading) {
@@ -126,7 +147,7 @@ const App = () => {
       {locations.length === 0 && !isLoading ? (
         <div style={{ padding: '20px', textAlign: 'center' }}>
           <h2>A trip has not been created yet</h2>
-          <p>Select Navigation / Add Title to begin.</p>
+          <p>Select Setup Menu Option to Begin.</p>
         </div>
       ) : null}
 
@@ -135,8 +156,9 @@ const App = () => {
         toggleMapPopups={toggleMapPopups}
         rotateMap={rotateMap}
         tripID={tripID}
-        mapboxAccessToken={mapBoxToken}
+        user={user}
         onLogin={handleLogin}
+        onTripChange={handleTripChange}
       />
 
       <Map
@@ -147,17 +169,35 @@ const App = () => {
         sanitizeId={sanitizeId}
         handlePopupClick={handlePopupClick}
         rotateMap={rotateMap}
+        tripID={tripID}
       />
 
+
+
       {isMapPopupOpen && (
-        <MapPopup
+        <LocationDetails
           onRequestClose={handleCMapPopupCloes}
           db={db}
+          locations={locations}
           currentMarker={currentLocation}
           tripID={tripID}
           user={user}
         />
       )}
+
+
+
+
+      {/* {isMapPopupOpen && (
+        <MapPopup
+          onRequestClose={handleCMapPopupCloes}
+          db={db}
+          locations={locations}
+          currentMarker={currentLocation}
+          tripID={tripID}
+          user={user}
+        />
+      )} */}
 
     </div>
   );

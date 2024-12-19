@@ -4,6 +4,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import ManagePictures from './ManagePictures';
 import ManageNonGPSPictures from './ManageNonGPSPictures';
 import Setup from './Setup';
+import SelectEdit from './SelectEdit';
 
 import { db } from '../utils/firebase';
 
@@ -15,21 +16,21 @@ import IosShareIcon from '@mui/icons-material/IosShare';
 
 import './navigation.css';
 
-function Navigation({ tripTitle, toggleMapPopups, rotateMap, tripID, mapboxAccessToken }) {
+function Navigation({ tripTitle, toggleMapPopups, rotateMap, tripID, user, onTripChange }) {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isPictureModalOpen, setIsPictureModalOpen] = useState(false);
   const [isNonGPSModalOpen, setIsNonGPSModalOpen] = useState(false);
   const [isSetupModalOpen, setIsSetupModalOpen] = useState(false);
+  const [iIsSelectEditModalOpen, setIsSelectEditModalOpen] = useState(false)
 
-  const [user, setUser] = useState(null);
   const [hasLocations, setHasLocations] = useState(false); // Track if locations exist
 
-  // Check if the "MAP-tripID-DATA" collection exists
+  // Check if the "TRIP-tripID-DATA" collection exists
   useEffect(() => {
     const checkLocations = async () => {
       if (!tripID) return;
       try {
-        const locationCollectionRef = collection(db, `MAP-${tripID}-DATA`);
+        const locationCollectionRef = collection(db, `TRIP-${tripID}-DATA`);
         const locationSnapshot = await getDocs(locationCollectionRef);
         setHasLocations(!locationSnapshot.empty); // Set to true if documents exist
       } catch (error) {
@@ -54,9 +55,14 @@ function Navigation({ tripTitle, toggleMapPopups, rotateMap, tripID, mapboxAcces
     setIsSetupModalOpen(true);
     setIsNavOpen(false);
   };
+  const handleSelectEditButtonClick = () => {
+    setIsSelectEditModalOpen(true);
+    setIsNavOpen(false);
+  };
 
   const closeSetupModal = () => setIsSetupModalOpen(false);
-  const closeNonGPSModal = () => setIsNonGPSModalOpen(false); // Close non-GPS modal
+  const closeNonGPSModal = () => setIsNonGPSModalOpen(false);
+  const cloesSelectEditModal = () => setIsSelectEditModalOpen(false);
 
   const handleShareButtonClick = () => {
     const subject = encodeURIComponent(tripTitle);
@@ -141,13 +147,12 @@ function Navigation({ tripTitle, toggleMapPopups, rotateMap, tripID, mapboxAcces
               Upload Pictures
             </button>
             <button className="nav--button" onClick={handleNonGPSPButtonClick}>
-              Upload Pictures without GPS
-            </button>
+              Upload Pictures without GPS </button>
             <hr />
             <button className="nav--button" onClick={handleSetupButtonClick}>
-              Setup
-            </button>
-            <button className="nav--button">Select Trips</button>
+              Setup </button>
+            <button className="nav--button" onClick={handleSelectEditButtonClick}>
+              Select Trip</button>
           </div>
         </div>
       )}
@@ -165,8 +170,13 @@ function Navigation({ tripTitle, toggleMapPopups, rotateMap, tripID, mapboxAcces
       )}
 
       {isSetupModalOpen && (
-        <Setup onClose={closeSetupModal} mapboxAccessToken={mapboxAccessToken} />
+        <Setup onClose={closeSetupModal} user={user} />
       )}
+
+    {iIsSelectEditModalOpen && (
+        <SelectEdit onClose={cloesSelectEditModal} user={user}   onTripChange={onTripChange}/>
+      )}
+
     </div>
   );
 }

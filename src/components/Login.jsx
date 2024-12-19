@@ -21,8 +21,8 @@ const Login = ({ onLogin, onClose, tripID, tripTitle }) => {
         return { valid: true };
       }
 
-      // Check if the MAP-tripID-DATA collection exists
-      const locationCollectionRef = collection(db, `MAP-${tripID}-DATA`);
+      // Check if the TRIP-tripID-DATA collection exists
+      const locationCollectionRef = collection(db, `TRIP-${tripID}-DATA`);
       const locationSnapshot = await getDocs(locationCollectionRef);
 
       if (locationSnapshot.empty) {
@@ -30,17 +30,19 @@ const Login = ({ onLogin, onClose, tripID, tripTitle }) => {
         return { valid: true };
       }
 
-      // Check if the user exists in the MAP-tripID-USERS collection
-      const validUserListCollection = `MAP-${tripID}-USERS`;
+      // Check if the user exists in the TRIP-tripID-USERS collection
+      const validUserListCollection = `TRIP-${tripID}-USERS`;
       const userCollectionRef = collection(db, validUserListCollection);
       const q = query(userCollectionRef, where("email", "==", email));
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
-        // User exists in the collection
-        return { valid: true };
+        // User exists, return the user document
+        const userDoc = querySnapshot.docs[0];
+        const userData = userDoc.data();
+        return { valid: true, userData };
       } else {
-        // Check if the MAP-tripID-USERS collection is empty
+        // Check if the TRIP-tripID-USERS collection is empty
         const userCollectionSnapshot = await getDocs(userCollectionRef);
         if (userCollectionSnapshot.empty) {
           // Add user to the collection if it's empty
@@ -50,10 +52,10 @@ const Login = ({ onLogin, onClose, tripID, tripTitle }) => {
             email,
             created: dateToday,
             color: 'Dark Blue',
-            hexColor: '0000CC',
+            hexColor: '#0000CC',
           });
-          console.log("User added to MAP-tripID-USERS collection:", email);
-          return { valid: true };
+          console.log("User added to TRIP-tripID-USERS collection:", email);
+          return { valid: true, userData: { email, color: 'Dark Blue', hexColor: '#0000CC' } };
         } else {
           // Collection is not empty; do not allow check-in
           return { valid: false, reason: "User not authorized and collection is not empty." };
@@ -70,11 +72,19 @@ const Login = ({ onLogin, onClose, tripID, tripTitle }) => {
       const result = await signInWithPopup(auth, provider);
       const email = result.user.email;
 
-      // Validate the user only if tripID and locations exist
+      // Validate the user and retrieve color/hexColor
       const userCheck = await checkValidUser(email);
 
       if (userCheck.valid) {
-        const userData = { ...result.user };
+        // Include color and hexColor in the user object
+        const { color, hexColor } = userCheck.userData || {};
+        const userData = {
+          ...result.user,
+          color: color || 'Dark Blue', // Default to Dark Blue
+          hexColor: hexColor || '#0000CC', // Default to Blue hex
+        };
+
+        console.log("user data ", userData);
         onLogin(userData);
         onClose();
       } else {

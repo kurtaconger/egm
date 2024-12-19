@@ -3,7 +3,7 @@ import { db } from './firebase'; // Import Firestore instance and tripNameData
 
 export const loadLocations = async (tripID) => {
   try {
-    const collectionRef = collection(db, "MAP-" + tripID + "-DATA");
+    const collectionRef = collection(db, "TRIP-" + tripID + "-DATA");
     const snapshot = await getDocs(collectionRef);
 
     if (snapshot.empty) {

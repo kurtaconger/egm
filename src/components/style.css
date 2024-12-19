@@ -16,6 +16,10 @@ body {
   min-height: 100vh;
 }
 
+
+
+
+
 .popup--modal-overlay {
   position: fixed;
   top: 0;
@@ -29,19 +33,24 @@ body {
   z-index: 500; /* Ensure modal is above all other elements */
 }
 
+/* main MapBox control */
 .popup--modal-content {
-  position: fixed;
-  margin: 0 auto;
+  background: white;
+  padding: 10px 0;
+  border-radius: 5px;
   width: 650px;
   height: 480px;
-  background: white;
-  z-index: 1000;
+  border: 1px solid green;
+  max-width: 85%;
+  min-width: 400px;
+  transform: translateY(5%);
+  z-index: 600; /* Ensure modal content is above the overlay */
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  transition: all 0.3s ease-in-out;
 }
+
+
 
 .popup--header {
   display: flex;
@@ -60,6 +69,7 @@ body {
   border: 1px solid #007bff;
   margin: 0;
 }
+
 
 .header__title {
   font-size: 1.5rem;
@@ -81,121 +91,140 @@ body {
   margin-top: 10px;
 }
 
+
+
 .header__button:hover {
   color: #0056b3;
   background-color: transparent;
   border-color: #0056b3;
 }
 
-
-
-.carousel-container {
-  border: 1px solid blue;
-  min-width: 300px;
-}
-
-.image-gallery {
-  max-width: 600px; /* Restricts width in normal mode */
-  position: relative;
+.gallery {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 500px; /* Fixed height for normal mode */
-  background-color: #f0f0f0;
-  border: 3px solid red;
-  margin: 0 auto;
-  box-sizing: border-box;
-  transition: all 0.3s ease-in-out;
 }
 
-.gallery-image {
-  max-width: 100%; /* Image scales to fit width */
-  max-height: 100%; /* Image scales to fit height */
-  width: auto; /* Maintain aspect ratio */
-  height: auto; /* Maintain aspect ratio */
+.gallery__item {
+  width: 240px;
+  margin: 5px;
 }
 
-/* .gallery-video {
-  max-width: 100%; 
-  max-height: 100%; 
-  width: auto; 
-  height: auto; 
-  object-fit: contain;
-  outline: none; 
-  display: block; 
-} */
-
-.gallery-video {
+.gallery__item img {
   max-width: 100%;
   height: auto;
-  object-fit: contain;
-  outline: none;
-  display: block;
+}
+
+.inline-gallery-container {
+  width: 700px;
+  height: 500px;
+  position: relative;
+}
+
+.lightGallery-captions {
+  h4 {
+    transform: translate3d(60px, 0, 0px);
+  }
+  p {
+    transform: translate3d(-60px, 0, 0px);
+  }
+  h4,
+  p {
+    opacity: 0;
+  }
+}
+
+.lg-current {
+  .lightGallery-captions {
+    h4,
+    p {
+      transform: translate3d(0, 0, 0px);
+    }
+    h4,
+    p {
+      opacity: 1;
+    }
+  }
+}
+.lg-slide-progress {
+  .lightGallery-captions {
+    h4 {
+      transform: translate3d(-60px, 0, 0px);
+    }
+    p {
+      transform: translate3d(60px, 0, 0px);
+    }
+    h4,
+    p {
+      opacity: 0;
+    }
+  }
+}
+
+.lightGallery-captions {
+  h4,
+  p {
+    transition: transform 0.4s ease-in-out, opacity 0.4s ease-in;
+  }
+}
+.lg-current {
+  .lightGallery-captions {
+    h4,
+    p {
+      transition-delay: 500ms;
+    }
+  }
+  &.lg-slide-progress {
+    .lightGallery-captions {
+      h4,
+      p {
+        transition-delay: 0ms;
+      }
+    }
+  }
 }
 
 
-.arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  color: white;
-  background-color: rgba(0, 0, 0, 0.5);
-  border-radius: 50%;
-  padding: 8px;
-  cursor: pointer;
-  z-index: 2;
+
+.inline-gallery-container {
+  width: 100%;
+  height: 40px !important;
+  max-height: 40px !important;
+  border: 5px solid orange !important; /* Debugging border */
+  position: relative;
+  overflow: hidden !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.back-arrow {
-  left: 5%;
+.lg-react-element,
+.lg-container,
+.lg-item,
+.lg-video {
+  height: 100% !important;
+  max-height: 100% !important;
 }
 
-.forward-arrow {
-  right: 5%;
-}
 
-.fullscreen-icon {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  color: white;
-  background-color: rgba(0, 0, 0, 0.5);
-  border-radius: 50%;
-  padding: 8px;
-  cursor: pointer;
-  z-index: 3;
-  transition: background-color 0.3s ease-in-out;
-}
 
-.fullscreen-icon:hover {
-  background-color: rgba(255, 255, 255, 0.7);
-  color: black;
-}
-
-.indicator {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  color: white;
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-  border-radius: 5px;
-  padding: 5px 10px; /* Adjust padding for better aesthetics */
-  font-size: 14px; /* Small and readable text */
-  font-family: Arial, sans-serif;
-  z-index: 3; /* Ensure it appears above the media */
-}
-
-/* Media Query for Small Screens (iPhone and similar devices) */
-@media (max-width: 800px) {
-  .image-gallery.fullscreen {
-    width: 100vw; /* Full screen width */
-    height: 100vh; /* Full screen height */
-    padding: 0; /* Reset padding for iPhones */
+@media (max-width: 600px) {
+  .inline-gallery-container {
+    width: 100%;
+    height: 40px; /* Enforce the height */
+    max-height: 40px; /* Limit maximum height */
+    border: 5px solid orange !important; /* Debugging border */
+    position: relative;
+    overflow: hidden; /* Prevent children from overflowing */
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .gallery-image {
-    max-width: calc(100vw - env(safe-area-inset-left) - env(safe-area-inset-right));
-    max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-    object-fit: contain; /* Maintain aspect ratio within safe areas */
+  /* Override LightGallery internal styles */
+  .lg-react-element,
+  .lg-container {
+    height: 100% !important; /* Force child elements to match parent height */
+    max-height: 100% !important;
   }
 }
