@@ -62,13 +62,15 @@ const Setup = ({ onClose, mapboxAccessToken }) => {
     setLoading(true);
     const stops = stopsText.split('\n').map((stop) => stop.trim()).filter(Boolean);
     const geocodedStops = [];
+
+    console.log('Google Maps API Key:', import.meta.env.VITE_GOOGLE_MAPS_API_KEY);
   
     for (let stop of stops) {
       try {
         const response = await fetch(
           `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
             stop
-          )}&key=AIzaSyAPVIvSZvycKh2JwhJ3bk8qO3fcjBygeN0`
+          )}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`
         );
   
         if (!response.ok) {
