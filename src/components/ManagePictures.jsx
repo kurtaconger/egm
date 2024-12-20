@@ -78,7 +78,7 @@ function ManagePictures({ isPictureModalOpen, closePictureModal, tripID }) {
 
         logWithTimestamp("GPS results before proceeding:", gpsResults);
 
-        // Upload only converted files and other non-HEIC files
+        // Upload converted files 
         const filesToUpload = [...converted, ...files.filter(file => !file.name.toLowerCase().endsWith('.heic'))];
         const uploaded = [];
         for (let file of filesToUpload) {
@@ -207,6 +207,15 @@ function ManagePictures({ isPictureModalOpen, closePictureModal, tripID }) {
                                     </ul>
                                 </div>
                             )}
+
+                            {selectedFiles.length > 0 && (
+                                <button
+                                    className="pict-modal--button close-loader-button"
+                                    onClick={closePictureModal}
+                                >
+                                    Close Picture Loader
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -222,5 +231,4 @@ ManagePictures.propTypes = {
 };
 
 export default ManagePictures;
-
-        
+     

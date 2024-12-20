@@ -17,6 +17,7 @@ const DisplayMedia = ({ currentMarker }) => {
       try {
         if (!currentMarker || !currentMarker.media || !Array.isArray(currentMarker.media)) {
           console.error('Invalid currentMarker or media array');
+          setLoading(false); // Stop loading if media array is invalid
           return;
         }
 
@@ -33,15 +34,15 @@ const DisplayMedia = ({ currentMarker }) => {
         console.log('Media URLs fetched:', urls);
       } catch (error) {
         console.error('Error fetching media URLs:', error);
+        setLoading(false);
       }
     };
 
     fetchMedia();
   }, [currentMarker]);
 
-  // Reset currentIndex to 0 when currentMarker changes
   useEffect(() => {
-    setCurrentIndex(0); // Reset index
+    setCurrentIndex(0);
   }, [currentMarker]);
 
   const handleNext = () => {
@@ -97,6 +98,14 @@ const DisplayMedia = ({ currentMarker }) => {
     );
   }
 
+  if (!mediaUrls.length) {
+    return (
+      <div>
+        <p className="popup--warning-message">No Pictures or Videos have been loaded for this location. Use menu option "Load Pictures" to load pictures or videos.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="carousel-container">
       <div className={`image-gallery ${isFullscreen ? 'fullscreen' : ''}`}>
@@ -120,5 +129,3 @@ const DisplayMedia = ({ currentMarker }) => {
 };
 
 export default DisplayMedia;
-
-
