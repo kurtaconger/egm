@@ -21,9 +21,8 @@
 .popup--modal-content {
   background: white;
   border-radius: 5px;
-  width: 650px;
-  min-height: 700px;
-  border: 5px solid green;
+  width: 700px;
+  min-height: 660px;
   max-width: 85%;
   min-width: 400px;
   transform: translateY(5%);
@@ -67,18 +66,6 @@
   margin-left: 8px;
 }
 
-
-.popup--app-border {
-  border: 6px solid black; /* Outer border for everything */
-  border-radius: 10px;
-  padding: 10px;
-  margin: 10px;
-  height: 640px; /* Fixed height for the entire container */
-  min-width: 600px; /* Ensures minimum width of 600px */
-  display: flex;
-  flex-direction: column;
-}
-
 .popup--app-container {
   display: flex;
   flex-direction: column;
@@ -113,7 +100,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  /* margin: 4px;  */
 }
 
 .popup--container {
@@ -130,12 +116,7 @@
   text-align: center;
 }
 
-/* Unique border colors for each container */
-.popup--media {
-  display: flex;
-  flex: 1; 
-  background-color: #e8f4ff;
-}
+/* DO WE NEED THIS SECTION? ---- Unique border colors for each container */
 
 .popup--ai-gen {
   border-color: var(--SYellow );
@@ -169,7 +150,7 @@
 }
 
 
-/* INTERVIEW USER AND GENERATE COMMENTS  */
+/* ---------- INTERVIEW USER AND GENERATE COMMENTS ---------- */
 .genai--container {
     display: flex;
     flex-direction: column;
@@ -233,133 +214,120 @@
   font-size: 1.5em;   /* Adjust icon size */
 }
 
-  
   .genai--button:disabled {
     background-color: #b0b0b0;
     cursor: not-allowed;
   }
-  
-    /* MEDIA GALLERY  */
-  .popup--media,
-  .carousel-container {
-    display: flex;
-    flex-direction: column; /* Ensures full vertical stacking */
-    justify-content: center; /* Vertically centers content */
-    align-items: center; /* Horizontally centers content */
-    width: 100%;
-    height: 100%; /* Force the height to match parent container */
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  
-  .image-gallery {
-    position: relative;
-    width: 100%;
-    height: 100%; /* Ensures full height of the container */
-    display: block; /* Prevents any inline spacing */
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    border: 3px solid red;
-  }
-  
-  .gallery-image {
-    width: 100%; /* Stretch horizontally */
-    height: 100%; /* Stretch vertically */
-    object-fit: contain; /* Ensures no cropping while filling the space */
-    display: block; /* Remove inline spacing */
-    margin: 0;
-    padding: 0;
-  }
-  
-  
-  
-  .arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    color: white;
-    background-color: rgba(0, 0, 0, 0.5);
-    border-radius: 50%;
-    padding: 8px;
-    cursor: pointer;
-    z-index: 2;
-  }
-  
-  .fullscreen-icon {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    color: white;
-    background-color: rgba(0, 0, 0, 0.5);
-    border-radius: 50%;
-    padding: 8px;
-    cursor: pointer;
-    z-index: 3;
-  }
-  
-  .indicator {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    color: white;
-    background-color: rgba(0, 0, 0, 0.5);
-    border-radius: 5px;
-    padding: 5px 10px;
-    font-size: 14px;
-    font-family: Arial, sans-serif;
-    z-index: 3;
-  }
-  
-  .gallery-video {
-    max-width: 100%;
-    height: auto;
-    object-fit: contain;
-    outline: none;
-    display: block;
-  }
-  
-  
-  .arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    color: white;
-    background-color: rgba(0, 0, 0, 0.5);
-    border-radius: 50%;
-    padding: 8px;
-    cursor: pointer;
-    z-index: 2;
-  }
-  
-  .back-arrow {
-    left: 5%;
-  }
-  
-  .forward-arrow {
-    right: 5%;
-  }
-  
-  
-  .fullscreen-icon:hover {
-    background-color: rgba(255, 255, 255, 0.7);
-    color: black;
-  }
-  
-  
+
+
+/* ---------- MEDIA GALLERY ---------- */
+/* Normal mode container */
+.carousel-container {
+  position: relative;
+  height: 500px;
+  width: 650px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* Ensures no overflow outside the container */
+}
+
+/* Media elements (image or video) */
+.carousel-media {
+  width: auto;
+  height: 100%;
+  object-fit: contain; /* Ensures content scales while maintaining aspect ratio */
+}
+
+/* Fullscreen mode adjustments */
+.media-component.fullscreen .carousel-container {
+  width: 100%;
+  height: 100%;
+  border: none; /* Removes border in fullscreen mode */
+}
+
+.media-component.fullscreen .carousel-media {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Fills fullscreen while maintaining aspect ratio */
+}
+
+/* Arrows and controls styling remain the same */
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: white;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  padding: 8px;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.back-arrow {
+  left: 20px; /* Positioned relative to the popup content */
+}
+
+.forward-arrow {
+  right: 20px; /* Positioned relative to the popup content */
+}
+
+.fullscreen-icon {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  padding: 8px;
+  cursor: pointer;
+  z-index: 3;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.fullscreen-icon:hover {
+  background-color: rgba(255, 255, 255, 0.7);
+  color: black;
+}
+
+
+.indicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  border-radius: 5px;
+  padding: 5px 10px; /* Adjust padding for better aesthetics */
+  font-size: 14px; /* Small and readable text */
+  font-family: Arial, sans-serif;
+  z-index: 3; /* Ensure it appears above the media */
+}
+
   /* Media Query for Small Screens (iPhone and similar devices) */
   @media (max-width: 800px) {
-    .image-gallery.fullscreen {
-      width: 100vw; /* Full screen width */
-      height: 100vh; /* Full screen height */
-      padding: 0; /* Reset padding for iPhones */
+
+    .carousel-container {
+      height: 250px;
+      width: 325px;
+      border: 3px solid green;
     }
-  
+      
   }
   
 
+
    /* COMMENTS EDITED BY USER */
+.comments--message {
+  margin: 10px;
+  font-weight: normal;
+}
+
+.comments--name {
+  font-weight: bold;
+}
+
  .comments--editor-control-div {
   border: 1px solid var(--SYellow);
   height: 100%;
@@ -373,6 +341,23 @@
   line-height: 1.5;
   padding: 4px;
 }
+
+.comments--editable-container {
+  border: 1px solid #ccc;
+  padding: 5px;
+  margin: 10px;
+  min-height: 100px;
+  font-size: 16px;
+  line-height: 1.5;
+  outline: none;
+  background-color: #f9f9f9;
+}
+
+.comments--user-display-name {
+  color: var(--user-color, #000); 
+  font-style: normal;
+}
+
 
 
 
@@ -397,5 +382,4 @@
 }
 
 
-  
   

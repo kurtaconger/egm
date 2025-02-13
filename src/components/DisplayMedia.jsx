@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { ref, getDownloadURL } from 'firebase/storage';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
@@ -11,6 +11,42 @@ const DisplayMedia = ({ currentMarker }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const fullscreenRef = useRef(null); // Ref for fullscreen container
+  const touchStartX = useRef(null); // Track touch start X coordinate
+  const touchStartY = useRef(null); // Track touch start Y coordinate
+
+  // useEffect(() => {
+  //   const fetchMediaUrls = async () => {
+  //     try {
+  //       const files = [
+  //               "BI-pool-h.jpg",
+  //               "BI-moped-h.jpg",
+  //               "Baths-P23.jpg",
+  //               "Sunset over harbor.jpg",
+  //               "IMG_0285.jpeg",
+  //               "small-test.mp4",
+  //                     ];
+
+  //     const urls = await Promise.all(
+  //       files.map(async (file) => {
+  //         const fileRef = ref(storage, `uploaded_media/${file}`);
+  //         return {
+  //           url: await getDownloadURL(fileRef),
+  //           type: file.endsWith('.mp4') ? 'video' : 'image',
+  //         };
+  //       })
+  //     );
+
+  //     setMediaUrls(urls);
+  //     } catch (error) {
+  //     console.error('Error fetching media URLs:', error);
+  //     }
+  //     };
+
+  //     fetchMediaUrls();
+  //     }, []);
+
+
 
   useEffect(() => {
     const fetchMedia = async () => {
@@ -20,15 +56,19 @@ const DisplayMedia = ({ currentMarker }) => {
           setLoading(false); // Stop loading if media array is invalid
           return;
         }
-
-        // Fetch URLs for the media files from Firebase Storage
+  
+        // Fetch URLs and types for the media files from Firebase Storage
         const urls = await Promise.all(
           currentMarker.media.map(async (path) => {
             const fileRef = ref(storage, path);
-            return await getDownloadURL(fileRef);
+            const url = await getDownloadURL(fileRef);
+            return {
+              url,
+              type: path.endsWith('.mp4') ? 'video' : 'image',
+            };
           })
         );
-
+  
         setMediaUrls(urls);
         setLoading(false);
         console.log('Media URLs fetched:', urls);
@@ -37,9 +77,10 @@ const DisplayMedia = ({ currentMarker }) => {
         setLoading(false);
       }
     };
-
+  
     fetchMedia();
   }, [currentMarker]);
+  
 
   useEffect(() => {
     setCurrentIndex(0);
@@ -56,76 +97,102 @@ const DisplayMedia = ({ currentMarker }) => {
   };
 
   const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
+    if (isFullscreen) {
+      document.exitFullscreen?.();
+      setIsFullscreen(false);
+    } else {
+      if (fullscreenRef.current?.requestFullscreen) {
+        fullscreenRef.current.requestFullscreen();
+      } else {
+        fullscreenRef.current.style.position = 'fixed';
+        fullscreenRef.current.style.top = '0';
+        fullscreenRef.current.style.left = '0';
+        fullscreenRef.current.style.width = '100vw';
+        fullscreenRef.current.style.height = '100vh';
+        fullscreenRef.current.style.zIndex = '9999';
+      }
+      setIsFullscreen(true);
+    }
   };
 
-  const renderMedia = () => {
-    if (!mediaUrls.length || !mediaUrls[currentIndex]) {
-      return <p>Loading media...</p>;
+  const exitFullscreenOnEscape = (e) => {
+    if (e.key === 'Escape' && isFullscreen) {
+      setIsFullscreen(false);
+      if (fullscreenRef.current) {
+        fullscreenRef.current.style.position = '';
+        fullscreenRef.current.style.top = '';
+        fullscreenRef.current.style.left = '';
+        fullscreenRef.current.style.width = '';
+        fullscreenRef.current.style.height = '';
+        fullscreenRef.current.style.zIndex = '';
+      }
     }
-
-    const currentMedia = mediaUrls[currentIndex];
-    console.log('Current media being rendered:', currentMedia);
-
-    if (currentMedia.includes('.mp4')) {
-      return (
-        <video
-          controls
-          muted
-          loop
-          className="gallery-video"
-        >
-          <source src={currentMedia} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-      );
-    }
-
-    return (
-      <img
-        src={currentMedia}
-        alt={`Slide ${currentIndex + 1}`}
-        className="gallery-image"
-      />
-    );
   };
 
-  if (loading) {
-    return (
-      <div className="popup--modal-overlay">
-        <p>Loading media...</p>
-      </div>
-    );
-  }
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
 
-  if (!mediaUrls.length) {
-    return (
-      <div>
-        <p className="popup--warning-message">No Pictures or Videos have been loaded for this location. Use menu option "Load Pictures" to load pictures or videos.</p>
-      </div>
-    );
-  }
+  const handleTouchMove = (e) => {
+    if (!touchStartX.current || !touchStartY.current) return;
+
+    const touchEndX = e.touches[0].clientX;
+    const touchEndY = e.touches[0].clientY;
+
+    const diffX = touchStartX.current - touchEndX;
+    const diffY = touchStartY.current - touchEndY;
+
+    if (Math.abs(diffX) > Math.abs(diffY)) {
+      if (diffX > 50) {
+        handleNext();
+        touchStartX.current = null;
+        touchStartY.current = null;
+      } else if (diffX < -50) {
+        handlePrevious();
+        touchStartX.current = null;
+        touchStartY.current = null;
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
+
+  useEffect(() => {
+    document.addEventListener('keydown', exitFullscreenOnEscape);
+    return () => {
+      document.removeEventListener('keydown', exitFullscreenOnEscape);
+    };
+  }, [isFullscreen]);
+
+
+
 
   return (
-    <div className="carousel-container">
-      <div className={`image-gallery ${isFullscreen ? 'fullscreen' : ''}`}>
-        <ArrowBackIosNewIcon
-          className="arrow back-arrow"
-          onClick={handlePrevious}
-        />
-        {renderMedia()}
-        <ArrowForwardIosIcon
-          className="arrow forward-arrow"
-          onClick={handleNext}
-        />
-        <FullscreenIcon
-          className="fullscreen-icon"
-          onClick={toggleFullscreen}
-        />
+    <div className={`media-component ${isFullscreen ? 'fullscreen' : ''}`} ref={fullscreenRef}>
+      <div className="carousel-container" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
+      >
+        <ArrowBackIosNewIcon className="arrow back-arrow" onClick={handlePrevious} />
+
+        {mediaUrls.length > 0 && mediaUrls[currentIndex].type === 'video' ? (
+          <video className="carousel-media" src={mediaUrls[currentIndex].url} controls></video>
+        ) : (
+          <>
+            <img className="carousel-media" src={mediaUrls[currentIndex]?.url} alt="carousel content"
+            />
+            <FullscreenIcon className="fullscreen-icon" onClick={toggleFullscreen} />
+          </>
+        )}
+
+        <ArrowForwardIosIcon className="arrow forward-arrow" onClick={handleNext} />
+
         <div className="indicator">{`${currentIndex + 1} / ${mediaUrls.length}`}</div>
       </div>
     </div>
-  );
+  )
 };
 
 export default DisplayMedia;

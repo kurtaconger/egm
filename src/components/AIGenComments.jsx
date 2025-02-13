@@ -7,21 +7,25 @@ import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import RestoreIcon from '@mui/icons-material/Restore';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
+
 import { db } from '../utils/firebase';
 
 import './locationDetails.css';
 
-const AIGenComments = ({ currentMarker, tripID, user }) => {
+const AIGenComments = ({ currentMarker, tripID, user, commentSaved, setCommentSaved }) => {
     // State variables
     const [userResponse, setUserResponse] = useState('');
     const [showInstruction, setShowInstruction] = useState(true);
     const [processedText, setProcessedText] = useState('');
     const [isListening, setIsListening] = useState(false);
-    const [remainingTime, setRemainingTime] = useState(30);
+    const [remainingTime, setRemainingTime] = useState(45);
     const [micPermission, setMicPermission] = useState(true);
     const [voiceAvailable, setVoiceAvailable] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [updatedUser, setUpdatedUser] = useState({ displayName: user.displayName, hexColor: user.hexColor });
+
     const { speak, voices } = useSpeechSynthesis();
+    
     
     // Refs
     const mediaRecorderRef = useRef(null);
@@ -30,15 +34,34 @@ const AIGenComments = ({ currentMarker, tripID, user }) => {
     // Constants for Text-to-Speech and ChatGPT processing
     const currentSpotName = currentMarker?.shortName || 'the location';
     const voiceNumber = 1;
-    const initialQuestion = `What is the most memorable experience at your stop at ${currentSpotName}`;
-    const preQuestionForChatGPT = `I was asked what is the most memorable experience visit to ${currentSpotName}, summarize my response which follows: `;
+    const initialQuestion = `What is the most memorable experience related to ${currentSpotName}`;
+    const preQuestionForChatGPT = `I was asked what is the most memorable experience related to ${currentSpotName}, summarize my response which follows. Do not use the phrase my most memorable experience: `;
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            if (user?.email) {
+                const userDocRef = doc(db, `TRIP-${tripID}-USERS`, user.email);
+                const userSnap = await getDoc(userDocRef);
+                if (userSnap.exists()) {
+                    const fetchedUserData = userSnap.data();
+                    setUpdatedUser(fetchedUserData); // ✅ Ensure user state is updated
+                    console.log("✅ User updated from Firebase:", fetchedUserData);
+                } else {
+                    console.warn("⚠️ No user data found in Firebase.");
+                }
+            }
+        };
+        fetchUserData();
+    }, [tripID, user.email]); // ✅ Fetch when user changes
+   
+
 
     // Reset component state when currentMarker changes
     useEffect(() => {
         setUserResponse('');
         setProcessedText('');
         setIsListening(false);
-        setRemainingTime(30);
+        setRemainingTime(45);
     }, [currentMarker]);
 
     // Load available voices for Text-to-Speech
@@ -97,7 +120,7 @@ const AIGenComments = ({ currentMarker, tripID, user }) => {
     // Start recording user's response via microphone
     const startRecording = () => {
         setIsListening(true);
-        setRemainingTime(30);
+        setRemainingTime(45);
         setProcessedText(`Listening . . . ${remainingTime} seconds left. Press button below for more time`);
 
         navigator.mediaDevices.getUserMedia({ audio: true })
@@ -199,28 +222,48 @@ const AIGenComments = ({ currentMarker, tripID, user }) => {
 
     // Save summarized response to Firebase
     const saveSummary = async () => {
-        const docRef = doc(db, `TRIP-${tripID}-DATA`, currentMarker.id);
-        const newContent = `<p><span color="${user.hexColor}" data-color="${user.hexColor}" style="color: ${user.hexColor}">[${user.displayName}] ${processedText}</span></p>`;
-    
         try {
+            console.log("🔄 Fetching latest user info before saving...");
+            
+            const userDocRef = doc(db, `TRIP-${tripID}-USERS`, user.email);
+            const userSnap = await getDoc(userDocRef);
+            
+            let userData;
+            if (userSnap.exists()) {
+                userData = userSnap.data(); // ✅ Get latest data from Firebase
+                setUpdatedUser(userData);  // ✅ Update local state
+                console.log("✅ User data fetched:", userData);
+            } else {
+                console.warn("⚠️ No user data found in Firebase, using local state.");
+                userData = updatedUser; // ✅ Use local state as a fallback
+            }
+    
+            if (!userData?.displayName || !userData?.hexColor) {
+                console.error("⚠️ User data is missing required fields:", userData);
+                return;
+            }
+    
+            const docRef = doc(db, `TRIP-${tripID}-DATA`, currentMarker.id);
+            const newContent = `<p><span color="${userData.hexColor}" data-color="${userData.hexColor}" style="color: ${userData.hexColor}">[${userData.displayName}] ${processedText}</span></p>`;
+    
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
                 const currentContent = docSnap.data().content || "";
                 const updatedContent = currentContent ? currentContent + newContent : newContent;
                 await updateDoc(docRef, { content: updatedContent });
-                console.log("Summary saved:", updatedContent);
     
-                // Hide the instruction message
+                console.log("✅ Summary saved with:", updatedContent);
                 setShowInstruction(false);
-    
-                setProcessedText(`Your most memorable experience for ${currentSpotName} was saved to the joint narrative. Press the "Edit Comments" button above to see the joint narrative.`);
+                setCommentSaved(true);
+                setProcessedText(`Your most memorable experience for ${currentSpotName} was saved.`);
             } else {
-                console.error("Document does not exist!");
+                console.error("⚠️ Document does not exist!");
             }
         } catch (error) {
-            console.error("Error saving summary:", error);
+            console.error("⚠️ Error saving summary:", error);
         }
     };
+    
     
 
     // Stop recording manually and start processing
@@ -241,11 +284,19 @@ const AIGenComments = ({ currentMarker, tripID, user }) => {
     // Erase the current recording and start over
     const eraseAndReRecord = () => {
         setUserResponse('');
-        setProcessedText(`Listening . . . ${remainingTime} seconds left. Press button below for more time`);
-        startRecording();
+        setRemainingTime(45); // ✅ Reset the timer explicitly
+        setProcessedText(`Listening . . . 45 seconds left. Press button below for more time`);
+        
+        // Clear any existing recording intervals before restarting
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+        }
+        
+        startRecording(); // ✅ Start fresh recording
     };
+    
 
-    return (
+     return (
         <div className="genai--container">
             {!micPermission && <p style={{ color: 'red' }}>Microphone access is denied. Please enable it in your browser settings.</p>}
 
@@ -256,13 +307,11 @@ const AIGenComments = ({ currentMarker, tripID, user }) => {
                 placeholder="Listening . . ."
             />
 
-
             {showInstruction && !isListening && !isProcessing && processedText && (
                 <p className="genai--instruction">
                     Update the summary created by ChatGPT, then press 'Save' below to save to the joint narrative.
                 </p>
             )}
-
 
             <div className="genai--button-container">
                 <button className="genai--button" onClick={addMoreTime} disabled={!isListening}>
@@ -280,17 +329,6 @@ const AIGenComments = ({ currentMarker, tripID, user }) => {
             </div>
         </div>
     );
-};
-
-AIGenComments.propTypes = {
-    currentMarker: PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        shortName: PropTypes.string,
-    }).isRequired,
-    tripID: PropTypes.string.isRequired,
-    user: PropTypes.shape({
-        displayName: PropTypes.string.isRequired,
-    }).isRequired,
 };
 
 export default AIGenComments;

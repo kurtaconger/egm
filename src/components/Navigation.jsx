@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 
 import ManagePictures from './ManagePictures';
 import ManageNonGPSPictures from './ManageNonGPSPictures';
@@ -21,7 +21,7 @@ function Navigation({ tripTitle, toggleMapPopups, rotateMap, tripID, user, onTri
   const [isPictureModalOpen, setIsPictureModalOpen] = useState(false);
   const [isNonGPSModalOpen, setIsNonGPSModalOpen] = useState(false);
   const [isSetupModalOpen, setIsSetupModalOpen] = useState(false);
-  const [iIsSelectEditModalOpen, setIsSelectEditModalOpen] = useState(false)
+  const [iIsSelectEditModalOpen, setIsSelectEditModalOpen] = useState(false);
 
   const [hasLocations, setHasLocations] = useState(false); // Track if locations exist
 
@@ -47,17 +47,48 @@ function Navigation({ tripTitle, toggleMapPopups, rotateMap, tripID, user, onTri
     setIsPictureModalOpen(true);
     setIsNavOpen(false);
   };
+
   const handleNonGPSPButtonClick = () => {
     setIsNonGPSModalOpen(true);
     setIsNavOpen(false);
   };
+
   const handleSetupButtonClick = () => {
     setIsSetupModalOpen(true);
     setIsNavOpen(false);
   };
+
   const handleSelectEditButtonClick = () => {
     setIsSelectEditModalOpen(true);
     setIsNavOpen(false);
+  };
+
+  const handleInitializeClick = async () => {
+    console.log("initialize");
+
+    // The colors to be added to the userColors field
+    const userColors = [
+      '#0000CC',
+      '#008000',
+      '#000000',
+      '#B22222',
+      '#800080',
+      '#FF8C00',
+      '#008080',
+      '#8B4513',
+      '#800000',
+      '#333333',
+    ];
+
+    try {
+      const parametersDocRef = doc(db, 'TRIP-GLOBAL', 'parameters');
+
+      // Update the userColors field in the parameters document
+      await updateDoc(parametersDocRef, { userColors });
+      console.log('User colors successfully initialized in Firebase.');
+    } catch (error) {
+      console.error('Error initializing user colors in Firebase:', error);
+    }
   };
 
   const closeSetupModal = () => setIsSetupModalOpen(false);
@@ -70,17 +101,13 @@ function Navigation({ tripTitle, toggleMapPopups, rotateMap, tripID, user, onTri
     const isIPhone = /iPhone/.test(navigator.userAgent);
 
     if (isIPhone) {
-      // Provide a choice for iPhone users
       const useSMS = window.confirm("Do you want to share via SMS? Click Cancel to use Email.");
       if (useSMS) {
-        // Open SMS app
         window.location.href = `sms:?body=Check out this trip: ${window.location.href}`;
       } else {
-        // Open Email app
         window.location.href = `mailto:?subject=${subject}&body=${body}`;
       }
     } else {
-      // Default to email for other devices
       window.location.href = `mailto:?subject=${subject}&body=${body}`;
     }
   };
@@ -153,6 +180,8 @@ function Navigation({ tripTitle, toggleMapPopups, rotateMap, tripID, user, onTri
               Setup </button>
             <button className="nav--button" onClick={handleSelectEditButtonClick}>
               Select Trip</button>
+            <button className="nav--button" onClick={handleInitializeClick}>
+              Initialize</button>
           </div>
         </div>
       )}
@@ -174,7 +203,7 @@ function Navigation({ tripTitle, toggleMapPopups, rotateMap, tripID, user, onTri
       )}
 
     {iIsSelectEditModalOpen && (
-        <SelectEdit onClose={cloesSelectEditModal} user={user}   onTripChange={onTripChange}/>
+        <SelectEdit onClose={cloesSelectEditModal} user={user} onTripChange={onTripChange} />
       )}
 
     </div>

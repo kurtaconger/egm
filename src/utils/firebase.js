@@ -37,4 +37,4 @@ signInAnonymously(auth)
         console.error('Error signing in:', error);
     });
 
-export { db, storage };
+export { db, storage, auth };

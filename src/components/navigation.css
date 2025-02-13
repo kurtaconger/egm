@@ -145,14 +145,14 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 2000;
   }
   
   .modal--content {
     background-color: white;
     border-radius: 8px;
     padding: 20px;
-    width: 800px;
+    max-width: 600px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   }
   
@@ -391,6 +391,117 @@
 
 
 
+/* Color Button Bar */
+.color--button-bar {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+/* Color Selection Grid - 2 Column Layout */
+.color--grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+/* Each Color Row (Button + Label) */
+.color--grid-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+/* Circular Color Button */
+.color--button {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid #444;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+.color--button:hover {
+  transform: scale(1.1);
+}
+
+.color--button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Color Label */
+.color--label {
+  font-size: 14px;
+  color: #333;
+  font-weight: bold;
+}
+
+/* Color Label */
+.color--label {
+  font-size: 14px;
+  color: #333;
+  font-weight: bold;
+}
+
+/* Syntax check modal to check for valid user names in comments box  */
+.valid-names-container {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Valid Names Table */
+.valid-names-table {
+  display: table;
+  margin: 10px 0;
+  text-align: left;
+  border: 1px solid var(--SYellow); /* Add a yellow border */
+  padding: 10px; /* Add padding for better spacing */
+}
+
+.valid-names-table table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.valid-names-table td {
+  text-align: left;
+  padding: 8px 12px;
+  min-width: 200px; /* Ensure a minimum column width */
+  vertical-align: top; /* Align names to the top of the columns */
+}
+
+.config--label strong {
+  font-weight: bold;
+}
+
+.syntax--button-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px; /* Add space between buttons */
+}
+
+.syntax--button {
+  padding: 8px 16px;
+  background-color: var(--sDarkBlue);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 14px;
+}
+
+.syntax--button:hover {
+  background-color: var(--SYellow);
+  color: var(--sDarkBlue);
+}
 
 
 

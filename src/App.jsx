@@ -3,7 +3,7 @@ import { getDoc, doc } from 'firebase/firestore';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './index.css';
 import Navigation from './components/Navigation';
-// import MapPopup from './components/MapPopup';
+import UserDisplayNameAndColor from './components/UserDisplayNameAndColor';
 import LocationDetails from './components/LocationDetails'
 
 import Map from './components/Map';
@@ -22,10 +22,11 @@ const App = () => {
   const [tripTitle, setTripTitle] = useState('');
   const [isMapPopupOpen, setIsMapPopupOpen] = useState(false);
   const [currentLocation, setCurrentLocation] = useState(null);
-  const [user, setUser] = useState(null); // State for logged-in user
-  const [tripID, setTripID] = useState(null); // Explicit tripID state
+  const [user, setUser] = useState(null); 
+  const [tripID, setTripID] = useState(null);
+  const [showUserDisplayNameAndColor, setShowUserDisplayAndColor] = useState(false);
 
-
+  // to handle parameters passed to App.
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -34,10 +35,9 @@ const App = () => {
   const handleTripChange = (newTripID) => {
     if (newTripID !== tripID) {
       setTripID(newTripID);
-      navigate(`/?ID=${newTripID}`); // Update the URL with the new tripID
+      navigate(`/?ID=${newTripID}`); 
     }
   };
-
 
   const loadTripData = async () => {
     try {
@@ -107,18 +107,38 @@ const App = () => {
     }
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  // identiy first time users after login. First time users do not have a hexColot
+  const handleLogin = async (loggedInUser) => {
+    setUser(loggedInUser);
+    console.log('User logged in:', loggedInUser);
+
+    try {
+      const userDocRef = doc(db, `TRIP-${tripID}-USERS`, loggedInUser.email);
+      const userSnapshot = await getDoc(userDocRef);
+
+      if (userSnapshot.exists()) {
+        const userData = userSnapshot.data();
+        setUser({ ...loggedInUser, ...userData });
+
+        if (!userData.hexColor) {
+          console.log("First-time login detected. Prompting for display name and color.");
+          setShowUserDisplayAndColor(true);
+        }
+      } else {
+        console.log("New user detected. Prompting for display name and color.");
+        setShowUserDisplayAndColor(true);
+      }
+    } catch (error) {
+      console.error("Error retrieving user data:", error);
+    }
   };
 
-  const handleCMapPopupCloes = () => { setIsMapPopupOpen(false) }
-
-  const handleLogin = (user) => {
-    setUser(user);
-    console.log('User logged in:', user);
-  };
-
-
+  useEffect(() => {
+    if (user && !user.hexColor) {
+      console.log("No hexColor found, forcing user setup modal.");
+      setShowUserDisplayAndColor(true);
+    }
+  }, [user]);
 
   // Wait for tripID and tripTitle to load before showing Login or app content
   if (isLoading) {
@@ -131,7 +151,6 @@ const App = () => {
 
   // Display Login Component if user is not logged in
   if (!user) {
-    
     return (
       <Login
         onLogin={handleLogin}
@@ -172,11 +191,9 @@ const App = () => {
         tripID={tripID}
       />
 
-
-
       {isMapPopupOpen && (
         <LocationDetails
-          onRequestClose={handleCMapPopupCloes}
+          onRequestClose={ () => setIsMapPopupOpen(false)}
           db={db}
           locations={locations}
           currentMarker={currentLocation}
@@ -185,19 +202,15 @@ const App = () => {
         />
       )}
 
-
-
-
-      {/* {isMapPopupOpen && (
-        <MapPopup
-          onRequestClose={handleCMapPopupCloes}
-          db={db}
-          locations={locations}
-          currentMarker={currentLocation}
-          tripID={tripID}
+      {showUserDisplayNameAndColor && (
+        <UserDisplayNameAndColor
           user={user}
+          tripID={tripID}
+          onClose={() => setShowUserDisplayAndColor(false)}
+          updateUser={setUser}
         />
-      )} */}
+      )}
+
 
     </div>
   );

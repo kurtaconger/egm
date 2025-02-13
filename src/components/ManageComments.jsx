@@ -1,159 +1,167 @@
-import { useEffect, useState } from 'react';
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import { Mark } from '@tiptap/core';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-
+import React, { useEffect, useRef, useState } from 'react';
+import { doc, getDoc, setDoc, collection, getDocs } from 'firebase/firestore';
 import { db } from '../utils/firebase';
-
+import ReplaceDisplayNameAndColor from './ReplaceDisplayNameAndColor';
 import './locationDetails.css';
 
-const colors = {
-  Kurt: '#0000CC', // Blue
-  Alexander: '008000', // Green
-  PJ: '#956F2E', // Yellow
-  Carin: '#D35400' // Orange
-};
 
-const CommentColor = Mark.create({
-  name: 'commentColor',
-  addOptions() {
-    return {
-      colors: colors,
-    };
-  },
-  addAttributes() {
-    return {
-      color: {
-        default: null,
-      },
-    };
-  },
-  parseHTML() {
-    return [
-      {
-        tag: 'span',
-        getAttrs: element => ({
-          color: element.getAttribute('data-color'),
-        }),
-      },
-    ];
-  },
-  renderHTML({ HTMLAttributes }) {
-    return ['span', { ...HTMLAttributes, 'data-color': HTMLAttributes.color, style: `color: ${HTMLAttributes.color}` }, 0];
-  },
-});
-
-// Main Function
-const ManageComments = ({ user, currentMarker, tripID }) => {
-  // Check if user is logged in
+const ManageComments = ({ user, currentMarker, tripID, currentDisplayName, currentTextColor, onUpdateUser, refreshComments }) => {
   if (!user) {
     return <p>This function requires a login. Press the Login button in the upper right corner of the screen.</p>;
   }
 
-  const currentUser = user.displayName;
-  console.log ("user  ", currentUser)
-  const currentUserHexColor = user.hexColor;
-  console.log ("user color ", currentUserHexColor)
-  const tripNameData = "TRIP-" + tripID + "-DATA";
-
+  const [content, setContent] = useState('');
+  const [showUserDisplay, setShowUserDisplay] = useState(false);
+  const editableRef = useRef(null);
+  const tripNameData = `TRIP-${tripID}-DATA`;
   const currentDocumentID = currentMarker.id;
+  const mouseTimeout = useRef(null);
 
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-      CommentColor.configure({
-        colors: colors,
-      }),
-    ],  
-    content: '',
-    editorProps: {
-      handlePaste(view, event) {
-        event.preventDefault();
-        const text = event.clipboardData.getData('text/plain');
-        const fragment = view.state.schema.text(text, [
-          view.state.schema.marks.commentColor.create({
-            color: user.hexColor,
-          }),
-        ]);
-        const tr = view.state.tr.replaceSelectionWith(fragment);
-        view.dispatch(tr);
-        return true;
-      },
-    },
-  });
-
-  const [isNameAdded, setIsNameAdded] = useState(false);
-
+  // Make sure editable div is up to date
   useEffect(() => {
-    const handleChange = async () => {
-      if (editor && currentDocumentID) {
-        const htmlContent = editor.getHTML();
-        if (currentDocumentID) {
-          console.log(`Setting content for document: ${tripNameData}/${currentDocumentID}`);
-          const locationRef = doc(db, tripNameData, currentDocumentID);
-          await setDoc(locationRef, { content: htmlContent }, { merge: true });
-        }
-      }
-    };
-
-    if (editor) {
-      editor.on('update', handleChange);
+    if (editableRef.current) {
+      console.log("Current Display Name:", currentDisplayName);
+      console.log("Editable Content Before Update:", editableRef.current.innerHTML);
+  
+      let updatedContent = editableRef.current.innerHTML.replace(/\[([^\]]+)\]/g, `[${currentDisplayName}]`);
+      editableRef.current.innerHTML = updatedContent;
+      setContent(updatedContent);
+  
+      console.log("Editable Content After Update:", editableRef.current.innerHTML);
     }
-
-    return () => {
-      if (editor) {
-        editor.off('update', handleChange);
-      }
-    };
-  }, [editor, currentDocumentID]);
-
+  }, [currentDisplayName]);
+  
   useEffect(() => {
-    const fetchComments = async () => {
-      if (editor && currentDocumentID) {
-        console.log(`Fetching document: ${tripNameData}/${currentDocumentID}`);
+    const fetchContent = async () => {
+      try {
+        console.log("🔄 Fetching latest comments from Firebase...");
         const docRef = doc(db, tripNameData, currentDocumentID);
         const docSnap = await getDoc(docRef);
-
-        let content = '';
+        
         if (docSnap.exists()) {
-          content = docSnap.data().content || '';
+          const fetchedContent = docSnap.data().content || '';
+          setContent(fetchedContent);
+          
+          if (editableRef.current) {
+            editableRef.current.innerHTML = fetchedContent;  // ✅ Refresh content from Firebase
+          }
+  
+          console.log("✅ Comments refreshed from Firebase:", fetchedContent);
         }
-
-        editor.commands.setContent(content);
-        setIsNameAdded(false); // Reset the name added state for new location
+      } catch (error) {
+        console.error("⚠️ Error fetching updated content:", error);
       }
     };
+  
+    fetchContent();
+  }, [tripNameData, currentDocumentID, refreshComments]);  // ✅ Refresh when refreshComments updates
+  
+  const handleFirstClick = () => {
+    if (editableRef.current) {
+        let cleanedContent = editableRef.current.innerHTML.trim();
 
-    fetchComments();
-  }, [currentDocumentID, editor, currentUser]);
-
-  useEffect(() => {
-    if (editor) {
-      const handleFocus = () => {
-        if (!isNameAdded) {
-          const userName = `[${currentUser}] `;
-          console.log("in handlefocus user.hexColor " + user.hexColor + " " + user.textColor);
-          editor.chain().focus('end').insertContent({ type: 'text', text: userName, marks: [{ type: 'commentColor', attrs: { color: user.hexColor } }] }).run();
-          setIsNameAdded(true); // Mark that the user's name has been added
+        // Remove any auto-inserted <p><br></p> if it's empty
+        if (cleanedContent === "<p><br></p>" || cleanedContent === "<br>") {
+            cleanedContent = "";
+            editableRef.current.innerHTML = ""; // Clear the editable div
         }
-      };
 
-      editor.on('focus', handleFocus);
+        const existingSpanRegex = /<span[^>]*>\s*\[[^\]]+\]\s*<\/span>/g;
+        cleanedContent = cleanedContent.replace(existingSpanRegex, ""); // Remove old spans
 
-      return () => {
-        editor.off('focus', handleFocus);
-      };
+        const userNameTag = `[${currentDisplayName}]&nbsp;`; // Ensures space is inserted
+        const styledUserName = `<span class="user-display-name" style="color: ${currentTextColor}">${userNameTag}</span>`;
+
+        const updatedContent = cleanedContent + styledUserName;
+        setContent(updatedContent);
+        editableRef.current.innerHTML = updatedContent;
+
+        console.log("✅ Updated Content with Display Name:", updatedContent);
+
+        // ✅ Move cursor to the end of the inserted text
+        const range = document.createRange();
+        const sel = window.getSelection();
+        range.selectNodeContents(editableRef.current);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
     }
-  }, [currentUser, editor, isNameAdded]);
+};
+ 
+  const handleInput = async () => {
+    if (editableRef.current) {
+      const updatedContent = editableRef.current.innerHTML;
+      setContent(updatedContent);
 
-  useEffect(() => {
-    setIsNameAdded(false); // Reset the name added state when the user changes
-  }, [currentUser]);
+      // Update Firebase with the new content
+      try {
+        const docRef = doc(db, tripNameData, currentDocumentID);
+        await setDoc(docRef, { content: updatedContent }, { merge: true });
+        console.log('Content updated in Firebase:');
+      } catch (error) {
+        console.error('Error updating content in Firebase:', error);
+      }
+    }
+  };
+
+  const handlePaste = (event) => {
+    event.preventDefault();
+    const text = event.clipboardData.getData('text/plain'); // Get plain text from the clipboard
+    document.execCommand('insertText', false, text); // Insert plain text at the cursor
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === '[' || event.key === ']') {
+      event.preventDefault(); // Prevent the default input behavior
+      alert('Brackets are reserved characters indicating the author of a comment');
+    }
+  };
+
+  const handleMouseDown = (event) => {
+    console.log('Mouse down detected');
+    mouseTimeout.current = setTimeout(() => {
+      setShowUserDisplay(true);
+      console.log('Long press detected, showing UpdateUserName');
+    }, 700);
+  };
+
+  const handleMouseUp = () => {
+    console.log('Mouse up detected');
+    if (mouseTimeout.current) {
+      clearTimeout(mouseTimeout.current); // Clear timeout if mouse is released early
+      mouseTimeout.current = null;
+      console.log('Mouse up before long press, timeout cleared');
+    }
+  };
+
+  const closeUserDisplay = () =>  setShowUserDisplay(false);
 
   return (
-    <div className='comments--editor-control-div'>
-      <EditorContent editor={editor} spellCheck={true} />
+    <div className="comments--editor-control-div">
+      <div 
+      className='comments--message'
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}>
+        Comments being added/edited by <span className='comments--name'>{currentDisplayName}</span>
+      </div>
+      <div
+        ref={editableRef}
+        className="comments--editable-container"
+        contentEditable="true"
+        suppressContentEditableWarning={true} 
+        spellCheck="true"
+        onClick={handleFirstClick}
+        onInput={handleInput}
+        onPaste={handlePaste}
+        onKeyDown={handleKeyDown}
+      ></div>
+      {showUserDisplay && (
+        <ReplaceDisplayNameAndColor
+          user={user}
+          tripID={tripID}
+          onClose={() => setShowUserDisplay(false)}
+        />
+      )}
     </div>
   );
 };
